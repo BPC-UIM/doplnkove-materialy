@@ -11,6 +11,8 @@ Tento repozitář obsahuje doplňkové studijní materiály ke kurzu BPC-UIM. Za
 Verzování kódu a spolupráce prostřednictvím gitu a GitHubu.
 
 - [Práce s gitem a GitHubem](00-git/git-github-pripomenuti.md) — připomenutí základů verzování kódu pro grafická rozhraní.
+- [Historie, návraty a konflikty](00-git/historie-navraty-konflikty.md) — návraty ke starším stavům, řešení konfliktů, merge a rebase.
+- [Git v týmu a průběžná integrace](00-git/git-v-tymu-ci.md) — pull requesty a automatické kontroly pomocí GitHub Actions.
 
 ### 01-psani-kodu
 

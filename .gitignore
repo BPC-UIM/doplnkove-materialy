@@ -12,6 +12,7 @@ env/
 
 # tajné údaje a lokální nastavení
 .env
+CLAUDE.md
 
 # Jupyter
 .ipynb_checkpoints/
