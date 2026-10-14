@@ -56,7 +56,7 @@ mnozina: set[str]
 
 ## 4. Časté chyby a nástrahy
 
-1. **Měnitelný výchozí argument.** Zápis `def f(x: list = [])` představuje typickou chybu — výchozí seznam je sdílen mezi všemi voláními funkce. Správným postupem je `def f(x: list | None = None)` a uvnitř těla funkce `if x is None: x = []`.
+1. **Měnitelný výchozí argument.** Místo zápisu `def f(x: list = [])` se parametr anotuje jako `def f(x: list | None = None)` a seznam se vytvoří uvnitř těla funkce; důvod uvádí [materiál o psaní funkcí](jak-psat-funkce.md), kapitola 2.
 2. **Odkaz na dosud nedefinovaný typ** (například třída odkazující sama na sebe). Řešením je buď zápis názvu typu v uvozovkách (`-> "MojeTrida"`), nebo uvedení řádku `from __future__ import annotations` na začátku souboru.
 3. **Nadměrné anotování.** Cílem je čitelnost, nikoli formální úplnost. U zřejmých případů (`i = 0`) anotace nepřináší užitek; vhodné je typovat především **rozhraní**, tj. hlavičky funkcí, veřejné API a návratové hodnoty.
 
@@ -104,7 +104,7 @@ pyright: 0 errors, 0 warnings, 0 informations
 
 > **Poznámka:** Konkrétní formulace hlášení se může mezi jednotlivými verzemi nástrojů mírně lišit; podstatná je informace o umístění a povaze chyby, nikoli doslovné znění textu.
 
-> **Poznámka ke spouštění (zejména na systému Windows):** Nástroj se zde spouští ve tvaru `python -m mypy ...`, tedy jako modul interpretu Pythonu. Tento zápis je spolehlivější než přímý příkaz `mypy ...`, který selže s hlášením `'mypy' is not recognized` v případě, že se příslušná složka `Scripts` nenachází v systémové proměnné `PATH`. Forma `python -m <nástroj>` tuto závislost obchází a funguje obdobně i pro další nástroje (`pip`, `pytest` aj.).
+> **Poznámka ke spouštění (zejména na systému Windows):** Nástroj se zde spouští ve tvaru `python -m mypy ...`, tedy jako modul interpretu Pythonu. Tento zápis je spolehlivější než přímý příkaz `mypy ...`, který selže s hlášením `'mypy' is not recognized` v případě, že se příslušná složka `Scripts` nenachází v systémové proměnné `PATH`. Forma `python -m <nástroj>` tuto závislost obchází a funguje obdobně i pro další nástroje (`pip`, `pytest` aj.; ke spouštění jako modul viz též [materiál o struktuře projektu](../03-projekt-a-prostredi/struktura-projektu.md), kapitola 6).
 
 ## 6. Doporučení pro praxi
 

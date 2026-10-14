@@ -131,7 +131,7 @@ if __name__ == "__main__":     # provede se jen při `python train.py`,
 
 Bez tohoto oddělení by se funkce `trenuj()` spustila i tehdy, kdyby jiný soubor pouze importoval funkci z tohoto modulu.
 
-> **Upozornění (souvislost s PyTorchem):** Konstrukce je nezbytná při paralelním zpracování. Na systémech, které nové procesy vytvářejí metodou *spawn* (Windows, macOS), `DataLoader` s `num_workers > 0` znovu importuje hlavní modul v každém podprocesu (viz materiál o infrastruktuře PyTorche). Není-li tréninkový kód uzavřen ve `if __name__ == "__main__"`, provede se v každém podprocesu znovu, což vede k chybě, případně k nekonečnému vytváření procesů.
+> **Upozornění (souvislost s PyTorchem):** Konstrukce je nezbytná při paralelním zpracování. Na systémech, které nové procesy vytvářejí metodou *spawn* (Windows, macOS), `DataLoader` s `num_workers > 0` znovu importuje hlavní modul v každém podprocesu (viz [materiál o infrastruktuře PyTorche](../04-strojove-uceni/pytorch-infrastruktura.md), kapitola 1.2). Není-li tréninkový kód uzavřen ve `if __name__ == "__main__"`, provede se v každém podprocesu znovu, což vede k chybě, případně k nekonečnému vytváření procesů.
 
 ### Vzor vstupního bodu
 
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     main()
 ```
 
-Funkce `main()` je zároveň předpokladem pro spustitelné příkazy definované v části `[project.scripts]` (kapitola 9), které na ni odkazují. Argumenty z příkazové řádky přitom představují nejvyšší vrstvu priority konfigurace (viz materiál o konfiguraci).
+Funkce `main()` je zároveň předpokladem pro spustitelné příkazy definované v části `[project.scripts]` (kapitola 9), které na ni odkazují. Argumenty z příkazové řádky přitom představují nejvyšší vrstvu priority konfigurace (viz [materiál o konfiguraci](konfiguracni-soubory.md), kapitola 4).
 
 ## 6. Importy
 
@@ -184,7 +184,7 @@ pip install -e .
 
 Po této instalaci je balíček dostupný pro import odkudkoli (z testů, skriptů i notebooků) a změny ve zdrojovém kódu se projeví okamžitě, bez opětovné instalace. To je hlavní důvod, proč rozsáhlejší projekt používá rozvržení se složkou `src/` a souborem `pyproject.toml` (kapitola 7).
 
-> **Upozornění (rozvržení `src/` a testy):** Používá-li projekt rozvržení se složkou `src/`, nenalezne nástroj `pytest` vlastní balíček, dokud není nainstalován v editovatelném režimu (`pip install -e .`); bez toho testy selžou chybou `ModuleNotFoundError`. Instalace balíčku je proto prvním krokem před spuštěním testů (viz materiál o testování).
+> **Upozornění (rozvržení `src/` a testy):** Používá-li projekt rozvržení se složkou `src/`, nenalezne nástroj `pytest` vlastní balíček, dokud není nainstalován v editovatelném režimu (`pip install -e .`); bez toho testy selžou chybou `ModuleNotFoundError`. Instalace balíčku je proto prvním krokem před spuštěním testů (viz [materiál o testování](../02-overovani-a-ladeni/testovani.md), kapitola 8).
 
 ### Cyklické importy
 
@@ -203,6 +203,22 @@ Náprava spočívá v úpravě závislostí mezi moduly, nikoli v obcházení ch
 - **Přesunout sdílený kód** do třetího modulu, na němž oba závisí (například `common.py`), čímž se cyklus rozpojí.
 - **Udržovat jednosměrný tok závislostí** — vyšší vrstvy (například `training`) závisejí na nižších (`models`, `dataio`), nikoli naopak. Obousměrná závislost je známkou nevhodného rozdělení.
 - Krajní možností je **odložený import** uvnitř funkce (namísto na začátku modulu), což však řeší pouze příznak, nikoli příčinu.
+
+```mermaid
+flowchart TD
+    S["scripts/"] --> T["training/"]
+    T --> M["models/"]
+    T --> D["dataio/"]
+    M --> U["utils/"]
+    D --> U
+    M -. "nevhodné: zpětná závislost vytváří cyklus" .-> T
+```
+
+Textový popis schématu:
+
+- Plné šipky vyjadřují směr importu: vstupní body ve `scripts/` importují `training/`, ten importuje `models/` a `dataio/` a ty využívají `utils/`.
+- Všechny plné šipky směřují od vyšší vrstvy k nižší, takže cyklus vzniknout nemůže.
+- Tečkovaná šipka znázorňuje nevhodnou zpětnou závislost: importuje-li `models/` z `training/`, vzniká cyklus `training → models → training`.
 
 ## 7. Kam co patří: rozvržení rozsáhlého projektu
 
@@ -284,7 +300,7 @@ projekt/
 
 > **Upozornění (kolize názvů):** Složka `src/projekt/models/` (zdrojový kód modelů) a kořenová složka pro **natrénované** modely by neměly nést týž název. Kořenová složka s uloženými modely se proto obvykle pojmenovává `artifacts/` nebo `checkpoints/`, aby nedošlo k záměně se zdrojovým balíčkem `models`.
 
-> **Zásada oddělení kódu, konfigurace a dat:** Kód patří do `src/`, nastavení do `configs/` (a tajné údaje do `.env`), data a výstupy do vlastních složek mimo verzování. Toto oddělení je společným vláknem několika materiálů této řady (konfigurace, logování) a rozvržení projektu je místem, kde se fyzicky uskutečňuje.
+> **Zásada oddělení kódu, konfigurace a dat:** Kód patří do `src/`, nastavení do `configs/` (a tajné údaje do `.env`), data a výstupy do vlastních složek mimo verzování (viz [materiál o gitu](../00-git/git-github-pripomenuti.md), kapitola 12). Toto oddělení je společným vláknem několika materiálů této řady ([konfigurace](konfiguracni-soubory.md), [logování](../02-overovani-a-ladeni/logovani.md)) a rozvržení projektu je místem, kde se fyzicky uskutečňuje.
 
 ### Obsah souboru README
 
@@ -319,7 +335,7 @@ ARTIFACTS = KOREN / "artifacts"
 
 Číslo v `parents[2]` odpovídá hloubce souboru: pro `src/projekt/paths.py` vede o dvě úrovně výše (`projekt` → `src` → kořen). Zápis cest operátorem `/` v modulu `pathlib` je navíc přenositelný mezi operačními systémy, na rozdíl od ručního skládání řetězců se znaky `/` či `\`.
 
-**Cesty v konfiguraci.** Ještě vhodnější je cesty do kódu vůbec nezapisovat, nýbrž je uvést v konfiguračním souboru (viz materiál o konfiguraci) a z kódu je pouze načíst. Změna umístění dat pak nevyžaduje zásah do kódu.
+**Cesty v konfiguraci.** Ještě vhodnější je cesty do kódu vůbec nezapisovat, nýbrž je uvést v konfiguračním souboru (viz [materiál o konfiguraci](konfiguracni-soubory.md)) a z kódu je pouze načíst. Změna umístění dat pak nevyžaduje zásah do kódu.
 
 > **Upozornění:** Pevně zapsaná relativní cesta (`"data/raw/x.csv"`) je jednou z nejčastějších příčin, proč projekt funguje autorovi, avšak selže na jiném stroji či při spuštění z jiné složky. Cesty je vhodné odvozovat od kořene projektu, nebo je načítat z konfigurace.
 
@@ -432,7 +448,7 @@ Doporučená disciplína:
 
 - **Předimenzovaná struktura.** Zakládat balíček se složkou `src/` a souborem `pyproject.toml` pro jednorázový skript je zbytečné (viz rozhodovací strom, kapitola 2).
 - **Poddimenzovaná struktura.** Ponechávat sdílený, dlouhodobý projekt v jediném notebooku či souboru znemožňuje testování a spolupráci.
-- **Data ve verzování.** Rozsáhlá data ani natrénované modely nepatří do repozitáře, nýbrž do složek mimo verzování.
+- **Data ve verzování.** Rozsáhlá data ani natrénované modely nepatří do repozitáře, nýbrž do složek mimo verzování (viz [materiál o gitu](../00-git/git-github-pripomenuti.md), kapitola 12).
 - **Pevně zapsané cesty.** Relativní cesta vůči pracovnímu adresáři selže při spuštění z jiné složky; cesty je vhodné odvozovat od kořene projektu nebo je načítat z konfigurace (viz kapitola 8).
 - **Modul zastiňující standardní knihovnu.** Soubor pojmenovaný jako modul standardní knihovny (`random.py`) způsobí obtížně odhalitelné chyby (viz kapitola 4).
 - **Cyklický import.** Vzájemná závislost dvou modulů vede k chybě při importu; řeší se úpravou závislostí, nikoli obcházením (viz kapitola 6).

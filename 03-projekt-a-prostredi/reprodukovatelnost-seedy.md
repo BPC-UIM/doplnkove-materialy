@@ -57,6 +57,22 @@ def nastav_seed(seed: int = 42) -> None:
     torch.cuda.manual_seed_all(seed)       # PyTorch (všechny GPU)
 ```
 
+```mermaid
+flowchart LR
+    S(["seed = 42"])
+    S --> G1["random<br/>standardní knihovna"]
+    S --> G2["np.random<br/>NumPy"]
+    S --> G3["torch<br/>CPU"]
+    S --> G4["torch.cuda<br/>GPU"]
+    S -. "nastavuje se zvlášť (kapitola 6)" .-> G5["generátory pracovních<br/>procesů DataLoaderu"]
+```
+
+Textový popis schématu:
+
+- Každý generátor má vlastní stav; funkce `nastav_seed` proto nastavuje seed u každého z nich samostatně.
+- Pracovní procesy `DataLoaderu` mají další, vlastní generátory, které funkce `nastav_seed` nezahrnuje; jejich seedování popisuje kapitola 6.
+- Generátor, u něhož seed nastaven není, vnáší do výpočtu náhodu, která se mezi běhy liší.
+
 V prostředí TensorFlow se seed nastavuje obdobně:
 
 ```python
@@ -88,7 +104,7 @@ from sklearn.model_selection import train_test_split
 X_train, X_test = train_test_split(X, random_state=42)
 ```
 
-> **Doporučení:** Preferujte lokální generátory a výslovné předávání seedu před globálním stavem — ze stejného důvodu, z jakého se v konfiguraci nedoporučuje spoléhat na globální měnitelný stav. Program je pak předvídatelnější a snáze laditelný.
+> **Doporučení:** Preferujte lokální generátory a výslovné předávání seedu před globálním stavem — ze stejného důvodu, z jakého se v konfiguraci nedoporučuje spoléhat na globální měnitelný stav (viz [materiál o konfiguraci](konfiguracni-soubory.md), kapitola 8). Program je pak předvídatelnější a snáze laditelný.
 
 ## 6. Nastavený seed ještě nezaručuje determinismus
 
@@ -97,7 +113,7 @@ Toto je nejdůležitější poznatek celého materiálu. Nastavení všech seed�
 > **Upozornění:** I při korektně nastavených seedech se výsledky mohou mezi běhy lišit. Nejčastější příčiny jsou:
 > - **výpočty na GPU** — některé operace nemají deterministickou implementaci,
 > - **paralelismus** — při souběžném zpracování závisí výsledek na pořadí, v němž se dílčí operace s plovoucí čárkou sečtou,
-> - **paralelní načítání dat** — každý pracovní proces (worker) má vlastní generátor, který je nutné zvlášť seedovat,
+> - **paralelní načítání dat** — každý pracovní proces (worker) má vlastní generátor, který je nutné zvlášť seedovat (viz [materiál o infrastruktuře PyTorche](../04-strojove-uceni/pytorch-infrastruktura.md), kapitola 3.8),
 > - **volba algoritmu kvůli rychlosti** — knihovna může za běhu zvolit rychlejší, avšak nedeterministickou variantu.
 
 Je proto užitečné rozlišovat **úrovně reprodukovatelnosti**:
@@ -122,7 +138,7 @@ Pevně zvolený seed tedy slouží k **opakovatelnosti konkrétního běhu**, kd
 Reprodukovatelnost není vlastností jediného řádku kódu, nýbrž celého záznamu podmínek experimentu. K jeho zopakování je nutné znát:
 
 - **použitý seed** — patří mezi konfigurační parametry projektu, a je tedy vhodné jej uvádět v konfiguračním souboru, nikoli jej „zadrátovat" do kódu,
-- **verze knihoven** — odlišná verze může vést k odlišnému výsledku i při stejném seedu, proto je nutné verze zafixovat (viz reprodukovatelnost prostředí).
+- **verze knihoven** — odlišná verze může vést k odlišnému výsledku i při stejném seedu, proto je nutné verze zafixovat (viz [materiál o kontejnerizaci](kontejnerizace.md), kapitola 7).
 
 Seed je tedy typický konfigurovatelný parametr; jeho začlenění do konfigurace zároveň zajistí, že bude spolu s ostatními parametry experimentu zaznamenán.
 

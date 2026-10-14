@@ -18,6 +18,37 @@ U základního gradientního sestupu je úprava pouhým vynásobením gradientu 
 
 Každý z následujících optimalizátorů přidává jednu myšlenku, která některé z těchto omezení zmírňuje.
 
+```mermaid
+flowchart LR
+    GD["gradientní sestup"]
+    MOM["moment (kap. 3)"]
+    NES["Nesterovův moment (kap. 3)"]
+    ADG["AdaGrad (kap. 4)"]
+    RMS["RMSProp (kap. 5)"]
+    ADAM["Adam (kap. 6)"]
+    ADAMW["AdamW (kap. 6)"]
+    VAR["Adamax, NAdam, RAdam (kap. 7)"]
+    ADD["Adadelta (kap. 7)"]
+
+    GD -- "setrvačnost" --> MOM
+    MOM --> NES
+    GD -- "krok pro každý parametr" --> ADG
+    ADG -- "klouzavý průměr" --> RMS
+    MOM --> ADAM
+    RMS --> ADAM
+    ADAM -- "oddělený úbytek vah" --> ADAMW
+    ADAM --> VAR
+    NES --> VAR
+    RMS --> ADD
+```
+
+Textový popis schématu:
+
+- Gradientní sestup se rozvíjí dvěma směry: moment přidává setrvačnost (omezení 2), AdaGrad zavádí vlastní učicí krok pro každý parametr (omezení 1).
+- Z momentu vychází Nesterovova varianta, z AdaGradu RMSProp, který prostý součet nahrazuje klouzavým průměrem.
+- Adam spojuje moment s adaptivním krokem RMSPropu; AdamW k němu přidává oddělený úbytek vah.
+- Z Adamu vycházejí varianty Adamax, NAdam (s Nesterovovým momentem) a RAdam; Adadelta je obdobou RMSPropu.
+
 ## 2. Jednotná notace
 
 Aby byly předpisy srovnatelné, používá se v celém materiálu jednotné značení:
@@ -92,7 +123,7 @@ Korekce vychýlení má jednoduché zdůvodnění: akumulátory se inicializují
 
 $$\theta_{t+1} = \theta_t - \eta\,\frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \varepsilon} - \eta\lambda\,\theta_t$$
 
-**Přednosti:** Adam je robustní a málo citlivý na volbu učicího kroku, což z něj činí obvyklou výchozí volbu. AdamW navíc dosahuje lepší zobecňovací schopnosti díky správně odděleným úbytku vah. **Omezení:** Udržuje dva akumulátory (vyšší paměťová náročnost) a v některých úlohách dosahuje horší zobecňovací schopnosti než dobře vyladěný gradientní sestup s momentem. Referenční práce: Kingma, Ba, arXiv:1412.6980, DOI 10.48550/arXiv.1412.6980 (Adam); Loshchilov, Hutter, arXiv:1711.05101, DOI 10.48550/arXiv.1711.05101 (AdamW).
+**Přednosti:** Adam je robustní a málo citlivý na volbu učicího kroku, což z něj činí obvyklou výchozí volbu. AdamW navíc dosahuje lepší zobecňovací schopnosti díky správně oddělenému úbytku vah; úbytek vah je přitom formou regularizace (viz [materiál o kompromisu mezi zkreslením a rozptylem](bias-variance.md), kapitola 9). **Omezení:** Udržuje dva akumulátory (vyšší paměťová náročnost) a v některých úlohách dosahuje horší zobecňovací schopnosti než dobře vyladěný gradientní sestup s momentem. Referenční práce: Kingma, Ba, arXiv:1412.6980, DOI 10.48550/arXiv.1412.6980 (Adam); Loshchilov, Hutter, arXiv:1711.05101, DOI 10.48550/arXiv.1711.05101 (AdamW).
 
 > **Implementace:** dokumentace PyTorche, [`torch.optim.Adam`](https://docs.pytorch.org/docs/2.14/generated/torch.optim.Adam.html) a [`torch.optim.AdamW`](https://docs.pytorch.org/docs/2.14/generated/torch.optim.AdamW.html).
 
@@ -137,7 +168,7 @@ $$m_t = \beta_1\, m_{t-1} + (1 - \beta_1)\, g_t, \qquad \theta_{t+1} = \theta_t 
 
 **AdEMAMix.** Kombinuje dva klouzavé průměry gradientu — jeden rychlý a jeden velmi pomalý — a využívá tak i starší gradienty, které obvyklý jediný průměr rychle zapomíná. *Přednosti:* lepší využití historie gradientů. *Omezení:* další akumulátor a další koeficienty k nastavení. Pagliardini, Ablin, Grangier, arXiv:2409.03137, DOI 10.48550/arXiv.2409.03137.
 
-**Schedule-Free (The Road Less Scheduled).** Odstraňuje potřebu plánu učicího kroku (viz materiál o infrastruktuře PyTorche) tím, že jej nahrazuje průměrováním iterací; nevyžaduje předem zadanou délku trénování. *Přednosti:* odpadá ladění plánu a metoda podává dobrý výsledek při zastavení v libovolném okamžiku. *Omezení:* jde o novější přístup, jehož chování v některých režimech se dosud zkoumá. Defazio a kol., arXiv:2405.15682, DOI 10.48550/arXiv.2405.15682.
+**Schedule-Free (The Road Less Scheduled).** Odstraňuje potřebu plánu učicího kroku (viz [materiál o infrastruktuře PyTorche](pytorch-infrastruktura.md), kapitola 3.2) tím, že jej nahrazuje průměrováním iterací; nevyžaduje předem zadanou délku trénování. *Přednosti:* odpadá ladění plánu a metoda podává dobrý výsledek při zastavení v libovolném okamžiku. *Omezení:* jde o novější přístup, jehož chování v některých režimech se dosud zkoumá. Defazio a kol., arXiv:2405.15682, DOI 10.48550/arXiv.2405.15682.
 
 **Muon.** Optimalizátor pro maticové (skryté) vrstvy, který moment před použitím **ortogonalizuje** (Newtonovou–Schulzovou iterací), a upravuje tak geometrii kroku. Je příkladem metody, která vznikla mimo obvyklou článkovou publikaci — původně jako veřejný technický zápis autorů — a do standardní knihovny `torch.optim` není zařazena. *Přednosti:* silné empirické výsledky při trénování rozsáhlých modelů. *Omezení:* použitelný jen pro maticové parametry (ostatní vyžadují jiný optimalizátor), ortogonalizace přináší dodatečný výpočet a metoda dosud dozrává. Jordan a kol., 2024, https://kellerjordan.github.io/posts/muon/; navazující vyhodnocení Liu a kol., arXiv:2502.16982, DOI 10.48550/arXiv.2502.16982.
 
@@ -194,11 +225,11 @@ plt.yscale("log"); plt.legend()
 plt.show()
 ```
 
-Na výsledném grafu je zpravidla patrné, že gradientní sestup s momentem konverguje rychleji než sestup prostý a že Adam dosahuje rychlého poklesu již v počátečních krocích. Přesné pořadí závisí na úloze a na volbě učicího kroku; příklad slouží k tomu, aby si student rozdíly ověřil sám.
+Na výsledném grafu je zpravidla patrné, že gradientní sestup s momentem konverguje rychleji než sestup prostý a že Adam dosahuje rychlého poklesu již v počátečních krocích. Přesné pořadí závisí na úloze a na volbě učicího kroku; příklad slouží k tomu, aby si student rozdíly ověřil sám. Srovnání na jediném seedu je přitom jen orientační; poctivě se výsledky vykazují přes více seedů (viz [materiál o reprodukovatelnosti](../03-projekt-a-prostredi/reprodukovatelnost-seedy.md), kapitola 7).
 
 ## 12. Praktické shrnutí a výběr
 
-Pro většinu úloh je vhodnou výchozí volbou **AdamW** (robustní, málo citlivý na učicí krok) nebo **gradientní sestup s momentem** (často lepší zobecnění, je-li dobře vyladěn). Adaptivní metody (AdaGrad, RMSProp, Adam) odstraňují potřebu jediného učicího kroku pro všechny parametry; moment tlumí oscilace. Metody druhého řádu a optimalizátory z výzkumné literatury přinášejí přednosti ve zvláštních situacích (rozsáhlé jazykové modely, paměťová omezení), avšak za cenu vyšší složitosti. Ve všech případech zůstává **učicí krok nejdůležitějším hyperparametrem**, jehož vliv převažuje nad volbou samotného optimalizátoru (k ladění hyperparametrů viz materiál o kompromisu mezi zkreslením a rozptylem).
+Pro většinu úloh je vhodnou výchozí volbou **AdamW** (robustní, málo citlivý na učicí krok) nebo **gradientní sestup s momentem** (často lepší zobecnění, je-li dobře vyladěn). Adaptivní metody (AdaGrad, RMSProp, Adam) odstraňují potřebu jediného učicího kroku pro všechny parametry; moment tlumí oscilace. Metody druhého řádu a optimalizátory z výzkumné literatury přinášejí přednosti ve zvláštních situacích (rozsáhlé jazykové modely, paměťová omezení), avšak za cenu vyšší složitosti. Ve všech případech zůstává **učicí krok nejdůležitějším hyperparametrem**, jehož vliv převažuje nad volbou samotného optimalizátoru (k ladění hyperparametrů viz [materiál o kompromisu mezi zkreslením a rozptylem](bias-variance.md), kapitola 7).
 
 ## Zdroje
 

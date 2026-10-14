@@ -6,6 +6,26 @@ Základní práce s PyTorchem — převod dat na tenzor a jeho průchod vrstvou 
 
 Text je členěn do tří okruhů: infrastruktura kolem dat, kolem modelu a kolem tréninku.
 
+```mermaid
+flowchart TB
+    DS["Dataset (1.1)"] --> DL["DataLoader (1.2)<br/>transformace (1.3), sampler (1.4)"]
+    DL -- "dávka" --> TO["přesun na zařízení (2.4)"]
+    TO --> ZG["optimizer.zero_grad() (3.1)"]
+    ZG --> FW["model(x) v režimu train() (2.1, 2.5)"]
+    FW --> LB["ztráta a backward() (3.1)"]
+    LB --> CL["ořezání gradientů (3.6), volitelně"]
+    CL --> ST["optimizer.step() (3.1)"]
+    ST -- "další dávka" --> DL
+    ST -- "konec epochy" --> EP["vyhodnocení: eval() a no_grad() (2.5, 3.3)<br/>scheduler.step() (3.2)<br/>checkpoint (3.4)"]
+    EP -- "další epocha" --> DL
+```
+
+Textový popis schématu (čísla v závorkách odkazují na kapitoly tohoto materiálu):
+
+- `Dataset` poskytuje jednotlivé vzorky, `DataLoader` z nich skládá dávky.
+- Každá dávka se přesune na výpočetní zařízení a proběhne tréninkový krok: vynulování gradientů, průchod modelem v trénovacím režimu, výpočet ztráty a zpětný průchod, volitelné ořezání gradientů a úprava parametrů.
+- Po zpracování všech dávek epochy následuje vyhodnocení v režimu `eval()` s vypnutým sledováním gradientů, posun učicího kroku a uložení checkpointu; poté začíná další epocha.
+
 ---
 
 ## Část 1 — Infrastruktura kolem dat
@@ -29,7 +49,7 @@ class MujDataset(Dataset):
         return self.vzorky[idx], self.popisky[idx]
 ```
 
-**Přínos:** Datová sada odděluje způsob přístupu k datům od tréninkové smyčky a poskytuje jednotné rozhraní, které využívá `DataLoader` (kapitola 1.2). Metody `__len__` a `__getitem__` jsou tytéž speciální metody, jež jsou popsány v materiálu o objektech.
+**Přínos:** Datová sada odděluje způsob přístupu k datům od tréninkové smyčky a poskytuje jednotné rozhraní, které využívá `DataLoader` (kapitola 1.2). Metody `__len__` a `__getitem__` jsou tytéž speciální metody, jež jsou popsány v [materiálu o objektech](../01-psani-kodu/zaklady-oop.md), kapitola 4.
 
 > **Přesah:** Načítá-li se vzorek až v `__getitem__` (například obrázek ze souboru podle indexu), nemusí se celá sada držet v paměti — lze tak pracovat s datovými sadami většími než operační paměť. Naopak: veškerá práce v `__getitem__` se provádí opakovaně pro každý vzorek a při paralelním načítání (kapitola 1.2) i souběžně, proto do ní nepatří zbytečně nákladné operace.
 
@@ -71,7 +91,7 @@ prevod = transforms.Compose([
 ])
 ```
 
-**Přínos:** Předzpracování se soustředí na jedno místo a snadno se skládá. Augmentace zvyšuje rozmanitost dat, a působí tak jako prostředek regularizace snižující rozptyl (viz materiál o kompromisu mezi zkreslením a rozptylem).
+**Přínos:** Předzpracování se soustředí na jedno místo a snadno se skládá. Augmentace zvyšuje rozmanitost dat, a působí tak jako prostředek regularizace snižující rozptyl (viz [materiál o kompromisu mezi zkreslením a rozptylem](bias-variance.md)).
 
 > **Přesah:** Augmentace náleží výhradně trénovacím datům. Použití náhodné augmentace na validační či testovací data je častou chybou — vede k nestálému a nesrovnatelnému hodnocení.
 
@@ -116,7 +136,7 @@ model = MujModel()
 vystup = model(vstup)         # volá forward prostřednictvím __call__
 ```
 
-**Přínos:** `nn.Module` automaticky spravuje parametry, jejich přesun mezi zařízeními i ukládání stavu. Zápis `model(vstup)` volá metodu `forward` prostřednictvím metody `__call__` — tedy mechanismem popsaným v materiálu o objektech.
+**Přínos:** `nn.Module` automaticky spravuje parametry, jejich přesun mezi zařízeními i ukládání stavu. Zápis `model(vstup)` volá metodu `forward` prostřednictvím metody `__call__` — tedy mechanismem popsaným v [materiálu o objektech](../01-psani-kodu/zaklady-oop.md), kapitola 4.
 
 > **Přesah:** Metoda `forward` se nikdy nevolá přímo (`model.forward(x)`); vždy se použije `model(x)`. Přímé volání obchází pomocné operace, které `__call__` provádí (mimo jiné přepínání režimů z kapitoly 2.5), a vede k obtížně odhalitelným chybám.
 
@@ -236,7 +256,7 @@ with torch.no_grad():
     predikce = model(X_test)
 ```
 
-**Přínos:** Kontext `torch.no_grad()` vypne sledování gradientů pro celý svůj blok; přísnější a rychlejší variantou je `torch.inference_mode()`. `torch.no_grad()` je zároveň kontextovým manažerem i dekorátorem (`@torch.no_grad()`), tedy prostředkem popsaným v materiálech o objektech a dekorátorech.
+**Přínos:** Kontext `torch.no_grad()` vypne sledování gradientů pro celý svůj blok; přísnější a rychlejší variantou je `torch.inference_mode()`. `torch.no_grad()` je zároveň kontextovým manažerem i dekorátorem (`@torch.no_grad()`).
 
 > **Přesah:** Vypnutí gradientů (`no_grad`) a přepnutí režimu (`eval`) jsou dvě různé věci a při vyhodnocení jsou zpravidla potřeba obě: první ovlivňuje paměť a výpočet, druhá chování vrstev.
 
@@ -261,7 +281,7 @@ scheduler.load_state_dict(stav["scheduler"])
 zacatek = stav["epocha"] + 1
 ```
 
-**Přínos:** Dlouhý trénink lze po přerušení obnovit, aniž by se počítal znovu od začátku.
+**Přínos:** Dlouhý trénink lze po přerušení obnovit, aniž by se počítal znovu od začátku. Uložení nejlepšího modelu přitom souvisí s včasným zastavením trénování (viz [materiál o kompromisu mezi zkreslením a rozptylem](bias-variance.md), kapitola 8).
 
 > **Přesah:** Ukládá se `state_dict`, nikoli celý objekt modelu (`torch.save(model)`) — uložení celého objektu váže soubor na uspořádání kódu a při jeho úpravě přestane fungovat. Pro skutečné obnovení tréninku je navíc nutné uložit i stav optimizeru a scheduleru; jejich opomenutí sice obnoví váhy, avšak nikoli rozpracovaný učicí krok a hybnost, takže trénink nepokračuje plynule.
 
@@ -315,26 +335,17 @@ for epocha in range(pocet_epoch):
 writer.close()
 ```
 
-**Přínos:** Zaznamenané průběhy umožňují porovnávat experimenty a rozpoznat například přeučení podle rozevírající se mezery mezi trénovací a validační ztrátou. Jde o obdobu zásad z materiálu o logování, uzpůsobenou číselným metrikám.
+**Přínos:** Zaznamenané průběhy umožňují porovnávat experimenty a rozpoznat například přeučení podle rozevírající se mezery mezi trénovací a validační ztrátou. Jde o obdobu zásad z [materiálu o logování](../02-overovani-a-ladeni/logovani.md), uzpůsobenou číselným metrikám.
 
 ### 3.8 Reprodukovatelnost tréninku
 
 Trénink obsahuje náhodu (inicializace vah, míchání, augmentace). Pro reprodukovatelnost je nutné ustálit zárodek u všech generátorů — a u paralelního načítání i u pracovních procesů `DataLoaderu`.
 
-```python
-import random
-import numpy as np
-
-def nastav_seed(seed: int = 42) -> None:
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-```
+Funkci, která zárodek ustálí u všech generátorů, uvádí [materiál o reprodukovatelnosti](../03-projekt-a-prostredi/reprodukovatelnost-seedy.md), kapitola 4.
 
 **Přínos:** Ustálení zárodku umožňuje trénink zopakovat se shodným výsledkem, což je podmínkou ověřitelnosti.
 
-> **Přesah:** Pracovní procesy `DataLoaderu` (`num_workers > 0`) mají vlastní generátory; bez jejich seedování (parametrem `worker_init_fn`) zůstává augmentace mezi běhy odlišná. Ustálení zárodku navíc nezaručuje plný determinismus — tato problematika má vlastní materiál o reprodukovatelnosti.
+> **Přesah:** Pracovní procesy `DataLoaderu` (`num_workers > 0`) mají vlastní generátory; bez jejich seedování (parametrem `worker_init_fn`) zůstává augmentace mezi běhy odlišná. Ustálení zárodku navíc nezaručuje plný determinismus — tato problematika má vlastní [materiál o reprodukovatelnosti](../03-projekt-a-prostredi/reprodukovatelnost-seedy.md), kapitola 6.
 
 ---
 

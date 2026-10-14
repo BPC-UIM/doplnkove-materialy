@@ -132,6 +132,23 @@ Nejužitečnější pole jsou `%(asctime)s` (čas), `%(name)s` (jméno loggeru),
 
 Záznam prochází cestou: logger → jeho handlery → každý handler jej naformátuje a odešle na své místo.
 
+```mermaid
+flowchart LR
+    Z["logger.debug(...)<br/>logger.info(...)"] --> L["logger modulu<br/>práh DEBUG"]
+    L --> H1["StreamHandler<br/>práh INFO"]
+    L --> H2["RotatingFileHandler<br/>práh DEBUG"]
+    H1 --> F1["Formatter"] --> O1["obrazovka"]
+    H2 --> F2["Formatter"] --> O2[("logs/run.log")]
+    L -. "propagace" .-> K["kořenový logger<br/>a jeho handlery"]
+```
+
+Textový popis schématu:
+
+- Záznam nejprve projde prahem loggeru; záznam s nižší úrovní, než je práh, se dále nepředává.
+- Logger předá záznam všem svým handlerům. Každý handler uplatní vlastní práh: záznam úrovně `INFO` dorazí na obrazovku i do souboru, záznam úrovně `DEBUG` pouze do souboru.
+- Handler záznam naformátuje svým formatterem a odešle do cíle.
+- Při zapnuté propagaci se záznam předá i kořenovému loggeru. Má-li i ten připojený handler, objeví se záznam na výstupu dvakrát.
+
 > **Upozornění:** První pokus o konfiguraci logování nejčastěji selže jedním ze dvou způsobů:
 > - **Nic se nezobrazí.** Prahová úroveň je vyšší než úroveň záznamu (výchozí úroveň kořenového loggeru je `WARNING`, takže `INFO` a `DEBUG` se bez snížení úrovně neobjeví).
 > - **Vše se zobrazí dvakrát.** Handler je připojen jak k vlastnímu loggeru, tak (typicky vlivem propagace) i ke kořenovému. Řeší se konfigurací na jediném místě, nebo vypnutím propagace: `logger.propagate = False`.
@@ -140,7 +157,7 @@ Záznam prochází cestou: logger → jeho handlery → každý handler jej nafo
 
 Nasměrování logů do souboru vyžaduje řád, jinak vznikne jediný nepřehledný soubor, v němž nelze nic dohledat.
 
-**Umístění.** Logy patří do vlastní složky (`logs/`) mimo systém správy verzí — tedy do `.gitignore`, obdobně jako soubor `.env` s citlivými údaji.
+**Umístění.** Logy patří do vlastní složky (`logs/`) mimo systém správy verzí — tedy do `.gitignore` (viz [materiál o gitu](../00-git/git-github-pripomenuti.md), kapitola 12), obdobně jako soubor `.env` s citlivými údaji.
 
 **Členění.** Vedle rotace podle velikosti či času (viz kapitola 3) je ve výzkumném kontextu často nejpřehlednější **jeden log na jeden běh**, pojmenovaný časem nebo identifikátorem experimentu a uložený vedle příslušného modelu. Návrat k dřívějšímu experimentu je pak snadný.
 
@@ -150,7 +167,7 @@ Do logu patří *co se stalo a dostatek kontextu, aby podle toho bylo možné je
 
 Do logu naopak **nepatří**:
 
-- **Citlivé údaje** — hesla, přístupové klíče, tokeny. Logy se sdílejí a přeposílají; tajný údaj v logu je nutné považovat za vyzrazený. (Souvislost s oddělením tajemství do `.env`.)
+- **Citlivé údaje** — hesla, přístupové klíče, tokeny. Logy se sdílejí a přeposílají. (K oddělení tajných údajů viz [materiál o konfiguraci](../03-projekt-a-prostredi/konfiguracni-soubory.md), kapitola 4.)
 - **Osobní data** — z důvodu ochrany soukromí.
 - **Rozsáhlé objekty** — celé datové struktury či tenzory. Zaznamenává se jejich tvar a několik statistik, nikoli obsah.
 - **Záznamy v těsné smyčce** — logování v cyklu přes velké množství prvků zahltí výstup a zpomalí program. Zaznamenávají se milníky, nikoli každý krok.

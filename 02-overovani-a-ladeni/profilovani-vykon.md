@@ -23,7 +23,7 @@ Optimalizace probíhá v opakovaném cyklu:
 1. **Změřit výchozí stav (baseline).** Zaznamenat dobu běhu před jakoukoli úpravou, aby bylo vůči čemu poměřovat.
 2. **Najít úzké hrdlo.** Profilerem zjistit, které místo spotřebovává nejvíce času. Zpravidla platí, že malá část kódu zabírá většinu doby běhu.
 3. **Upravit pouze úzké hrdlo.** Optimalizovat místo, které měření označilo, nikoli to, které se jeví podezřele.
-4. **Ověřit správnost.** Po úpravě potvrdit, že výsledek zůstal **nezměněný** — optimalizace, která změní výstup, je chyba. K tomu slouží test pokrývající daný případ (viz materiál o testování).
+4. **Ověřit správnost.** Po úpravě potvrdit, že výsledek zůstal **nezměněný** — optimalizace, která změní výstup, je chyba. K tomu slouží test pokrývající daný případ (viz [materiál o testování](testovani.md)).
 5. **Změřit znovu a porovnat.** Ověřit, že úprava skutečně pomohla, a o kolik.
 
 ### Amdahlův zákon: proč záleží na výběru místa
@@ -84,7 +84,7 @@ Ve výpisu je u každé funkce počet volání (`ncalls`), vlastní čas (`totti
 
 ### line_profiler — po jednotlivých řádcích
 
-Potřebuje-li se zjistit, který **řádek** funkce je pomalý, slouží k tomu `line_profiler` (instaluje se zvlášť). Funkce se označí dekorátorem `@profile` (viz materiál o dekorátorech) a spustí nástrojem `kernprof`; výstup uvádí čas připadající na každý řádek.
+Potřebuje-li se zjistit, který **řádek** funkce je pomalý, slouží k tomu `line_profiler` (instaluje se zvlášť). Funkce se označí dekorátorem `@profile` a spustí nástrojem `kernprof`; výstup uvádí čas připadající na každý řádek.
 
 ### Paměť
 
@@ -111,7 +111,7 @@ Dosud uvedené nástroje vyžadují úpravu či zvláštní spuštění programu
 
 U tréninku modelů je nejčastější otázkou, zda je úzkým hrdlem **načítání dat**, nebo **výpočet na grafické kartě**. Obojí se odhalí odlišně:
 
-- **Využití grafické karty** ukáže příkaz `nvidia-smi` (sledovaný průběžně `nvidia-smi dmon`). Nízké využití karty při dlouhém běhu zpravidla znamená, že karta čeká na data — úzkým hrdlem je tedy načítání (řeší se parametrem `num_workers` u `DataLoaderu`, viz materiál o infrastruktuře PyTorche), nikoli výpočet.
+- **Využití grafické karty** ukáže příkaz `nvidia-smi` (sledovaný průběžně `nvidia-smi dmon`). Nízké využití karty při dlouhém běhu zpravidla znamená, že karta čeká na data — úzkým hrdlem je tedy načítání (řeší se parametrem `num_workers` u `DataLoaderu`, viz [materiál o infrastruktuře PyTorche](../04-strojove-uceni/pytorch-infrastruktura.md), kapitola 1.2), nikoli výpočet.
 - **`torch.profiler`** rozliší čas strávený na procesoru a na kartě a přiřadí jej k jednotlivým operacím.
 
 > **Upozornění (synchronizační body):** Volání jako `.item()`, `.cpu()` nebo `print(tenzor)` uvnitř tréninkové smyčky vynutí **synchronizaci** procesoru a grafické karty — procesor musí počkat na dokončení výpočtu na kartě. Ve smyčce přes mnoho dávek to výrazně zpomaluje. Takové převody se provádějí mimo smyčku, nebo co nejméně často.
@@ -237,7 +237,7 @@ Rozdíl bývá tisícinásobný, aniž by se změnila jediná operace — změni
 
 Druhým postupem s velkým dopadem je neprovádět tentýž výpočet vícekrát.
 
-**Zapamatování výsledků (memoizace).** Vrací-li funkce pro tytéž argumenty tentýž výsledek, lze jej uložit a při opakovaném volání vrátit bez přepočítání. Slouží k tomu dekorátor `functools.cache` (viz materiál o dekorátorech):
+**Zapamatování výsledků (memoizace).** Vrací-li funkce pro tytéž argumenty tentýž výsledek, lze jej uložit a při opakovaném volání vrátit bez přepočítání. Slouží k tomu dekorátor `functools.cache`:
 
 ```python
 from functools import cache
@@ -480,7 +480,7 @@ Druhá operace bývá přibližně dvakrát pomalejší, přestože počet sčí
 
 > **Přesah (PyTorch):** Metoda `.view()` tenzoru vyžaduje souvislé uložení. Po transpozici či jiné operaci, která pouze prohodí kroky, skončí chybou. Řešením je volání `.contiguous()`, které vytvoří souvislou kopii, případně metoda `.reshape()`, jež kopii vytvoří sama, je-li to nutné.
 
-**Datové typy.** Volba typu ovlivňuje paměť i rychlost. Pole typu `float32` zabírá poloviční paměť oproti `float64` a na grafické kartě se zpracovává rychleji; pro mnoho úloh strojového učení je přesnost `float32` dostačující:
+**Datové typy.** Volba typu ovlivňuje paměť i rychlost. Pole typu `float32` zabírá poloviční paměť oproti `float64` a na grafické kartě se zpracovává rychleji; pro mnoho úloh strojového učení je přesnost `float32` dostačující (k využití nižší přesnosti při tréninku viz [materiál o infrastruktuře PyTorche](../04-strojove-uceni/pytorch-infrastruktura.md), kapitola 3.5):
 
 ```python
 import numpy as np
@@ -536,7 +536,7 @@ Optimalizace má svou míru. Platí několik zásad, kdy ustat:
 - **Dostačující rychlost.** Je-li program dostatečně rychlý pro svůj účel, další optimalizace nepřináší hodnotu.
 - **Nepatrný dopad.** Zrychlení místa, které zabírá zlomek celkového času (Amdahlův zákon, kapitola 2), nepřináší odpovídající užitek.
 - **Cena za čitelnost.** Překročí-li optimalizace únosnou mez zhoršení čitelnosti, je nutné zvážit, zda zisk vyváží pozdější obtížnější údržbu. Optimalizovaný úsek je vhodné opatřit komentářem vysvětlujícím, proč je napsán neobvykle.
-- **Zachování správnosti.** Žádné zrychlení není přijatelné za cenu nesprávného výsledku; po každé úpravě je nutné ověřit, že výstup zůstal nezměněný (viz materiál o testování).
+- **Zachování správnosti.** Žádné zrychlení není přijatelné za cenu nesprávného výsledku; po každé úpravě je nutné ověřit, že výstup zůstal nezměněný (viz [materiál o testování](testovani.md)).
 
 ## 14. Jít ještě dál: paralelizace a kompilace
 

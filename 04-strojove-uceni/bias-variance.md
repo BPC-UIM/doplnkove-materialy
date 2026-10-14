@@ -69,7 +69,7 @@ Toto rozlišení je pro řízení složitosti zásadní:
 
 Podstatné propojení s tímto materiálem: **hyperparametr často přímo řídí rovnováhu mezi zkreslením a rozptylem**. Větší hloubka stromu snižuje zkreslení a zvyšuje rozptyl; menší hodnota *k* rovněž snižuje zkreslení a zvyšuje rozptyl; silnější regularizace působí opačně. Volba hyperparametrů proto přímo určuje polohu na U-křivce.
 
-> **Rozcestník:** Hyperparametry jsou typickými konfiguračními parametry projektu; jejich správě se věnuje samostatný materiál o konfiguraci.
+> **Rozcestník:** Hyperparametry jsou typickými konfiguračními parametry projektu; jejich správě se věnuje samostatný [materiál o konfiguraci](../03-projekt-a-prostredi/konfiguracni-soubory.md).
 
 ## 7. Jak kompromis rozpoznat v praxi
 
@@ -119,7 +119,7 @@ plt.xlabel("hloubka stromu"); plt.ylabel("skóre"); plt.legend()
 
 **Učicí křivka** znázorňuje chybu v závislosti na velikosti trénovací množiny a slouží k rozlišení, zda převažuje zkreslení, nebo rozptyl. Jsou-li trénovací i validační chyba vysoké a blízké sobě, převažuje zkreslení (nedoučení) a přidání dat mnoho nezmění. Zůstává-li mezi nimi velká mezera, převažuje rozptyl (přeučení) a přidání dat obvykle pomůže.
 
-> **Rozcestník:** Rozdělení dat i křížová validace využívají náhody; pro reprodukovatelnost výsledků je nutné ustálit zárodek (viz `random_state` v příkladech). Této problematice se věnuje samostatný materiál o reprodukovatelnosti.
+> **Rozcestník:** Rozdělení dat i křížová validace využívají náhody; pro reprodukovatelnost výsledků je nutné ustálit zárodek (viz `random_state` v příkladech). Této problematice se věnuje samostatný [materiál o reprodukovatelnosti](../03-projekt-a-prostredi/reprodukovatelnost-seedy.md).
 
 ## 8. Jak kompromis ovlivnit
 

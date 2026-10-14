@@ -23,17 +23,32 @@ Pro rychlé ověření jediné hodnoty je `print` naprosto dostačující. Debug
 - **Opakované spuštění je nákladné.** Trvá-li výpočet minuty (typicky trénink modelu), je přidávání dalších příkazů `print` a opětovné spouštění zdlouhavé. Debugger umožní stav prozkoumat bez restartu.
 - **Je třeba interaktivně zkoumat.** U zastaveného programu lze vyhodnocovat libovolné výrazy a ověřovat domněnky přímo na místě.
 
-Rozdíl oproti přístupu s příkazem `print` lze shrnout takto: příkaz `print` představuje opakovaný cyklus (vložení řádku, opětovné spuštění, přečtení výstupu), kdežto debugger vyžaduje jediné zastavení, u něhož je dostupný celý stav. Ve vztahu k záznamu do logu (viz materiál o logování) platí dělba: **logování je pasivní záznam běhu, který se nesleduje; debugger je aktivní zkoumání běhu, který se sleduje.**
+Rozdíl oproti přístupu s příkazem `print` lze shrnout takto: příkaz `print` představuje opakovaný cyklus (vložení řádku, opětovné spuštění, přečtení výstupu), kdežto debugger vyžaduje jediné zastavení, u něhož je dostupný celý stav. Ve vztahu k záznamu do logu (viz [materiál o logování](logovani.md), kapitola 2) platí dělba: **logování je pasivní záznam běhu, který se nesleduje; debugger je aktivní zkoumání běhu, který se sleduje.**
 
 ## 3. Metodický postup ladění
 
 Debugger je nástroj; jeho účinnost však závisí na tom, zda je použit metodicky. Neuspořádané umísťování breakpointů zřídka vede k cíli. Osvědčený postup má pět kroků a odpovídá vědeckému přístupu k problému:
 
-1. **Spolehlivě zreprodukovat chybu.** Dříve, než lze chybu hledat, je nutné umět ji vyvolat na povel. Projevuje-li se jen občas, bývá příčinou náhoda; ustálení zárodku (viz materiál o reprodukovatelnosti) chybu ustálí. Vhodné je též sestavit **minimální příklad**, který chybu vyvolá co nejmenším kódem.
+1. **Spolehlivě zreprodukovat chybu.** Dříve, než lze chybu hledat, je nutné umět ji vyvolat na povel. Projevuje-li se jen občas, bývá příčinou náhoda; ustálení zárodku (viz [materiál o reprodukovatelnosti](../03-projekt-a-prostredi/reprodukovatelnost-seedy.md), kapitola 4) chybu ustálí. Vhodné je též sestavit **minimální příklad**, který chybu vyvolá co nejmenším kódem.
 2. **Zúžit místo výskytu.** Namísto zkoumání celého programu se postupuje **půlením**: zjistí se místo, kde je stav ještě správný, a místo, kde je již chybný; hledá se mezi nimi. Každý krok zhruba polovinu prostoru vyloučí. Vznikla-li chyba nedávnou změnou kódu, umožňuje totéž nad historií nástroj `git bisect`.
 3. **Vyslovit konkrétní hypotézu.** Hypotéza musí být ověřitelná — například „proměnná `x` je v tomto bodě `None`, protože předchozí funkce při prázdném vstupu nevrací hodnotu". Neurčité „něco je špatně" hypotézou není.
 4. **Ověřit hypotézu.** Na příslušné místo se umístí breakpoint a stav se prověří (kapitoly 5–7). Hypotéza se buď potvrdí, nebo vyvrátí; v obou případech se prostor hledání zúžil.
-5. **Opravit a potvrdit.** Po opravě je nutné ověřit nejen to, že chyba zmizela, nýbrž i to, že se nic jiného neporušilo. K tomu slouží test pokrývající daný případ (viz materiál o testování), který zároveň zabrání opětovnému výskytu.
+5. **Opravit a potvrdit.** Po opravě je nutné ověřit nejen to, že chyba zmizela, nýbrž i to, že se nic jiného neporušilo. K tomu slouží test pokrývající daný případ (viz [materiál o testování](testovani.md)), který zároveň zabrání opětovnému výskytu.
+
+```mermaid
+flowchart LR
+    R["1. Zreprodukovat chybu"] --> Z["2. Zúžit místo výskytu"]
+    Z --> H["3. Vyslovit hypotézu"]
+    H --> O["4. Ověřit hypotézu"]
+    O -- "vyvrácena" --> Z
+    O -- "potvrzena" --> P["5. Opravit a potvrdit"]
+```
+
+Textový popis schématu:
+
+- Kroky 1 až 4 probíhají v pevném pořadí.
+- Je-li hypotéza vyvrácena, prostor hledání se zúžil a postup se vrací ke kroku 2.
+- Je-li hypotéza potvrzena, následuje oprava a její potvrzení testem (krok 5).
 
 > **Zásada:** Při ověřování se mění **jediná věc najednou**. Současná změna více míst znemožňuje určit, které z nich mělo účinek. Užitečné je též zaznamenávat, co již bylo vyloučeno.
 
@@ -109,7 +124,7 @@ Bez příkazu `l` není na serveru vidět, u kterého řádku běh stojí; jde p
 
 > **Praktická poznámka:** Pohodlnější variantou konzolového debuggeru je `ipdb` (instaluje se příkazem `pip install ipdb`), který doplňuje zvýraznění syntaxe a doplňování názvů. Použít jej lze buď přímo (`import ipdb; ipdb.set_trace()`), nebo nastavením `PYTHONBREAKPOINT=ipdb.set_trace`, po němž i vestavěná funkce `breakpoint()` otevře `ipdb`.
 
-> **Upozornění:** Vestavěná funkce `breakpoint()` je součástí zdrojového kódu, a proto se snadno zapomene a odešle do systému správy verzí (viz materiál o gitu). Ponechaná v kódu zastaví běh i na cizím stroji či v automatizovaném prostředí. Před odevzdáním je nutné ji odstranit. Grafické breakpointy tímto nedostatkem netrpí.
+> **Upozornění:** Vestavěná funkce `breakpoint()` je součástí zdrojového kódu, a proto se snadno zapomene a odešle do systému správy verzí (viz [materiál o gitu](../00-git/git-github-pripomenuti.md)). Ponechaná v kódu zastaví běh i na cizím stroji či v automatizovaném prostředí. Před odevzdáním je nutné ji odstranit. Grafické breakpointy tímto nedostatkem netrpí.
 
 ### Logpoint: breakpoint bez zastavení
 
@@ -117,7 +132,7 @@ Bez příkazu `l` není na serveru vidět, u kterého řádku běh stojí; jde p
 
 V grafickém rozhraní se nastaví jako breakpoint s volbou pro výpis namísto zastavení: ve VS Code přímo jako „Logpoint", v PyCharmu jako breakpoint s vypnutou volbou „Suspend" a zapnutou „Evaluate and log". Do zprávy se zapíše výraz, například `epocha={epocha}, ztrata={ztrata}`.
 
-> **Vztah k logování:** Logpoint slouží k **dočasnému** sledování během laděného běhu, který je pozorován, a po nalezení chyby se odstraní. Má-li být záznam **trvalý** — součástí programu pro pozdější, nesledované běhy —, náleží tato úloha modulu `logging` (viz materiál o logování), nikoli logpointu. Rozdíl je týž jako mezi debuggerem a logováním obecně: logpoint je pomůcka pro pozorované ladění, logování je trvalý záznam.
+> **Vztah k logování:** Logpoint slouží k **dočasnému** sledování během laděného běhu, který je pozorován, a po nalezení chyby se odstraní. Má-li být záznam **trvalý** — součástí programu pro pozdější, nesledované běhy —, náleží tato úloha modulu `logging` (viz [materiál o logování](logovani.md)), nikoli logpointu. Rozdíl je týž jako mezi debuggerem a logováním obecně: logpoint je pomůcka pro pozorované ladění, logování je trvalý záznam.
 
 V konzoli `pdb` obdobnou funkci plní příkaz `commands`, jímž lze k breakpointu připojit akce (například výpis proměnné) zakončené příkazem `continue`; na vzdáleném stroji se však pro průběžný záznam obvykle použije rovnou modul `logging`.
 
@@ -146,6 +161,26 @@ Předpokládejme, že běh je pozastaven na **řádku 6**, tedy těsně před pr
 | **Step into** (vstoupit) | `s` (step) | Běh **vstoupí** do funkce `vynasob` a zastaví se na **řádku 2**, jejím prvním výkonném řádku. |
 | **Step out** (vystoupit) | `r` (return) | Dokončí aktuální funkci `zpracuj` a zastaví se u jejího volajícího (zde na řádku 10, po dokončení volání). |
 | **Continue** (pokračovat) | `c` (continue) | Pokračuje až k dalšímu breakpointu, nebo do konce programu. |
+
+```mermaid
+flowchart LR
+    subgraph ZP["funkce zpracuj"]
+        R6["ř. 6: y = vynasob(x, 2)"]
+        R7["ř. 7: z = y + 1"]
+    end
+    subgraph VN["funkce vynasob"]
+        R2["ř. 2: soucin = a * b"]
+    end
+    R10["ř. 10: vysledek = zpracuj(5)"]
+    BP["další breakpoint<br/>nebo konec programu"]
+
+    R6 -- "n: step over" --> R7
+    R6 -- "s: step into" --> R2
+    R6 -- "r: step out" --> R10
+    R6 -- "c: continue" --> BP
+```
+
+Textový popis schématu: ze zastavení na řádku 6 vede příkaz `n` na řádek 7 téže funkce, příkaz `s` na řádek 2 uvnitř volané funkce `vynasob`, příkaz `r` na řádek 10 ve volajícím kódu a příkaz `c` k dalšímu breakpointu, případně na konec programu.
 
 Volba mezi **step over** a **step into** je nejčastějším rozhodnutím při ladění: *step over* se použije, je-li volaná funkce považována za správnou (není třeba ji zkoumat), *step into* tehdy, je-li chyba předpokládána uvnitř ní.
 
@@ -278,7 +313,7 @@ except Exception:
 
 ## 10. Ladění testů
 
-Selže-li test (viz materiál o testování), je vhodné prozkoumat stav přesně v místě selhání, nikoli chybu dohledávat opakovaným spouštěním. Nástroj `pytest` to umožňuje přímo.
+Selže-li test (viz [materiál o testování](testovani.md), kapitola 8), je vhodné prozkoumat stav přesně v místě selhání, nikoli chybu dohledávat opakovaným spouštěním. Nástroj `pytest` to umožňuje přímo.
 
 **Zastavení v místě selhání.** Přepínač `--pdb` otevře konzolový debugger v okamžiku, kdy test selže (ve stavu odpovídajícím post-mortem ladění):
 
@@ -324,7 +359,7 @@ torch.float32
 device(type='cuda', index=0)
 ```
 
-Nesoulad tvaru (například očekáváno `[32, 64]`), nesprávný typ nebo rozdílné zařízení modelu a dat (viz materiál o infrastruktuře PyTorche) jsou nejčastější příčiny pádů; jediné zastavení je odhalí.
+Nesoulad tvaru (například očekáváno `[32, 64]`), nesprávný typ nebo rozdílné zařízení modelu a dat (viz [materiál o infrastruktuře PyTorche](../04-strojove-uceni/pytorch-infrastruktura.md), kapitola 2.4) jsou nejčastější příčiny pádů; jediné zastavení je odhalí.
 
 **Hledání `NaN`.** Objeví-li se v tréninku `NaN`, je vhodné zastavit se, jakmile se poprvé vyskytne. Podmíněný breakpoint (kapitola 8) to umožňuje přímo:
 
@@ -340,8 +375,8 @@ if torch.isnan(ztrata).any():
 
 - **Zapomenutý `breakpoint()` v kódu.** Ponechaný a odeslaný do repozitáře zastaví běh i na cizím stroji či v automatizovaném prostředí. Před odevzdáním je nutné jej odstranit; grafické breakpointy tento problém nemají.
 - **Obyčejný breakpoint ve smyčce.** Vede k neúměrnému počtu zastavení; řešením je podmíněný breakpoint (kapitola 8).
-- **Nereprodukovatelná chyba.** Projevuje-li se chyba jen občas, může být příčinou náhoda; ustálení zárodku (viz materiál o reprodukovatelnosti) umožní chybu spolehlivě vyvolat, a tedy odladit.
-- **Vektorizovaný kód nelze krokovat.** Operace nad celým polem (viz vektorizace) proběhne jediným příkazem, takže uvnitř není co krokovat. Zkoumá se místo toho vstup a výstup operace u breakpointu.
+- **Nereprodukovatelná chyba.** Projevuje-li se chyba jen občas, může být příčinou náhoda; ustálení zárodku (viz [materiál o reprodukovatelnosti](../03-projekt-a-prostredi/reprodukovatelnost-seedy.md), kapitola 4) umožní chybu spolehlivě vyvolat, a tedy odladit.
+- **Vektorizovaný kód nelze krokovat.** Operace nad celým polem (viz [vektorizace v materiálu o profilování](profilovani-vykon.md), kapitola 9) proběhne jediným příkazem, takže uvnitř není co krokovat. Zkoumá se místo toho vstup a výstup operace u breakpointu.
 - **Zanoření do knihovního kódu.** Neopatrné *step into* zavede běh do vnitřního kódu knihovny; řešením je režim „step into my code" (kapitola 6).
 
 ## 13. Shrnutí

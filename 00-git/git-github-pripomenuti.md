@@ -38,6 +38,30 @@ Kód mezi nimi přechází čtyřmi operacemi:
 - **push** (odeslat) — přenese lokální záznamy do vzdáleného repozitáře,
 - **pull** (stáhnout) — přenese záznamy ze vzdáleného repozitáře do lokálního.
 
+```mermaid
+flowchart LR
+    subgraph PC["Počítač studenta"]
+        direction LR
+        WD["Pracovní adresář"]
+        ST["Připravená oblast<br/>(staging)"]
+        LOC[("Lokální repozitář")]
+    end
+    REM[("Vzdálený repozitář<br/>GitHub")]
+
+    WD -- "stage" --> ST
+    ST -- "commit" --> LOC
+    LOC -- "push" --> REM
+    REM -- "pull" --> LOC
+    REM -. "clone" .-> LOC
+```
+
+Textový popis schématu:
+
+- Pracovní adresář, připravená oblast a lokální repozitář se nacházejí na počítači studenta; vzdálený repozitář je uložen na GitHubu.
+- Operace **stage** přesouvá změny z pracovního adresáře do připravené oblasti, **commit** je zaznamená do lokálního repozitáře.
+- Operace **push** přenáší záznamy z lokálního repozitáře do vzdáleného, **pull** opačným směrem.
+- Operace **clone** (kapitola 4) vytvoří lokální repozitář jako kopii vzdáleného na počátku práce.
+
 > **Grafické rozhraní toto rozdělení zobrazuje přímo.** V panelu správy verzí (ve VS Code „Source Control", v GitHub Desktopu „Changes", v PyCharmu „Commit") jsou upravené soubory zpravidla rozděleny do dvou seznamů: nepřipravené změny (pracovní adresář) a připravené změny (staging). Přesun mezi nimi odpovídá operaci stage. Sledování těchto dvou seznamů je nejrychlejší způsob, jak zjistit, kde se kód nachází.
 
 ## 4. Získání repozitáře: clone
@@ -104,6 +128,25 @@ Odbočení do vlastní větve je vhodné například při zkoušení nového pos
 
 **Sloučení** (merge) spojí změny z jedné větve do druhé — typicky se dokončená práce z vedlejší větve sloučí zpět do větve `main`. Nedotýkají-li se změny týchž míst, proběhne sloučení samočinně. Dotýkají-li se, vzniká konflikt (viz kapitola 10).
 
+```mermaid
+gitGraph
+    commit id: "A"
+    commit id: "B"
+    branch novy-postup
+    checkout novy-postup
+    commit id: "C"
+    commit id: "D"
+    checkout main
+    commit id: "E"
+    merge novy-postup id: "F"
+```
+
+Textový popis schématu:
+
+- Na větvi `main` vzniknou záznamy A a B.
+- Z bodu B odbočí větev `novy-postup`, na níž vzniknou záznamy C a D; hlavní větev mezitím pokračuje záznamem E.
+- Sloučením vznikne záznam F, který spojuje obě linie vývoje. Dotýkají-li se záznamy D a E téhož místa v souboru, nastane při sloučení konflikt.
+
 V grafickém rozhraní se sloučení vyvolá z nabídky větví (volba typu „Merge into current branch").
 
 ## 10. Konflikty
@@ -137,7 +180,7 @@ Následují nejčastější situace, které začátečníka znejistí, a jejich 
 
 Do verzování patří zdrojový kód, nikoli vše ostatní. K vyloučení vybraných souborů slouží soubor `.gitignore`, který obsahuje vzory názvů, jež git ignoruje. Do repozitáře zásadně **nepatří**:
 
-- **citlivé údaje** — hesla, přístupové klíče, tokeny; jednou odeslaný údaj je nutné považovat za vyzrazený,
+- **citlivé údaje** — hesla, přístupové klíče, tokeny (viz [materiál o konfiguraci](../03-projekt-a-prostredi/konfiguracni-soubory.md), kapitola 4),
 - **rozsáhlá data** — datové sady, obrázky, natrénované modely; git je určen pro text a kód, velké soubory repozitář zbytečně zvětšují,
 - **odvozené a dočasné soubory** — virtuální prostředí, `__pycache__`, logy; jde o obsah, který lze kdykoli znovu vytvořit.
 

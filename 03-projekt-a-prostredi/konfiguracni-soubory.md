@@ -73,11 +73,27 @@ Jde o koncept, který bývá opomíjen, ačkoli tvoří jádro správy konfigura
 1. **zabudované výchozí hodnoty** v kódu,
 2. **konfigurační soubor** (TOML/YAML),
 3. **proměnné prostředí** (typicky z `.env`),
-4. **parametry z příkazové řádky**.
+4. **parametry z příkazové řádky** (viz vzor vstupního bodu v [materiálu o struktuře projektu](struktura-projektu.md), kapitola 5).
 
 Vyšší vrstva přepisuje nižší. Tento mechanismus umožňuje mít rozumné výchozí hodnoty, jež lze pro konkrétní prostředí (vývoj, testování, provoz) cíleně přepsat, aniž by bylo nutné upravovat výchozí soubor.
 
-Citlivé údaje (hesla, přístupové klíče) patří do proměnných prostředí, **nikoli do verzovaného konfiguračního souboru**. Soubor `.env` se proto vždy uvádí do `.gitignore`. Načtení pomocí knihovny `python-dotenv`:
+```mermaid
+flowchart BT
+    V1["1. výchozí hodnota v kódu<br/>timeout = 30"]
+    V2["2. konfigurační soubor<br/>timeout = 60"]
+    V3["3. proměnné prostředí<br/>timeout neuveden"]
+    V4["4. příkazová řádka<br/>--timeout 120"]
+    R(["výsledná hodnota<br/>timeout = 120"])
+    V1 --> V2 --> V3 --> V4 --> R
+```
+
+Textový popis schématu:
+
+- Vrstvy jsou seřazeny zdola nahoru podle rostoucí priority; každá vyšší vrstva přepisuje hodnotu z nižší.
+- Výchozí hodnotu `30` přepíše konfigurační soubor na `60`. Proměnné prostředí hodnotu neuvádějí, platí tedy dosavadní `60`.
+- Parametr příkazové řádky přepíše hodnotu na `120`, která je výsledná.
+
+Citlivé údaje (hesla, přístupové klíče) patří do proměnných prostředí, **nikoli do verzovaného konfiguračního souboru**. Soubor `.env` se proto vždy uvádí do `.gitignore` (viz [materiál o gitu](../00-git/git-github-pripomenuti.md), kapitola 12). Načtení pomocí knihovny `python-dotenv`:
 
 ```python
 from dotenv import load_dotenv
@@ -160,7 +176,7 @@ Tímto způsobem lze udržovat hlavní soubor s odkazy na dílčí konfigurace a
 | `dynaconf` | správa konfigurace s vrstvením, prostředími a tajnými údaji |
 | `OmegaConf` | hierarchická konfigurace, slučování, interpolace |
 
-Nad knihovnou `OmegaConf` je vystavěn nástroj **Hydra**, určený pro rozsáhlou kompozici konfigurací (zejména ve výzkumu a strojovém učení). Jeho podrobný výklad přesahuje rozsah tohoto materiálu a může být předmětem samostatného textu.
+Nad knihovnou `OmegaConf` je vystavěn nástroj **Hydra**, určený pro rozsáhlou kompozici konfigurací (zejména ve výzkumu a strojovém učení). Jeho podrobný výklad přesahuje rozsah tohoto materiálu.
 
 ## 8. Časté chyby a nástrahy
 

@@ -57,7 +57,22 @@ class Student:
         self.jmeno = jmeno            # atribut instance — vlastní každému
 ```
 
-> **Upozornění:** Měnitelný atribut třídy (například seznam) je sdílen mezi všemi instancemi, což vede k nečekanému chování — jde o obdobu měnitelného výchozího argumentu funkce (viz materiál o typování).
+```mermaid
+flowchart LR
+    A["instance a = Student('Eva')<br/>jmeno = 'Eva'"]
+    B["instance b = Student('Jan')<br/>jmeno = 'Jan'"]
+    T["třída Student<br/>skola = 'Masarykova univerzita'"]
+    A -- "a.skola" --> T
+    B -- "b.skola" --> T
+```
+
+Textový popis schématu:
+
+- Atribut `jmeno` je uložen v každé instanci zvlášť; instance `a` a `b` mají každá vlastní hodnotu.
+- Atribut `skola` je uložen jednou, ve třídě. Zápis `a.skola` i `b.skola` vede k téže hodnotě uložené ve třídě.
+- Je-li touto hodnotou měnitelný objekt, projeví se jeho změna provedená přes kteroukoli instanci u všech instancí (viz upozornění níže).
+
+> **Upozornění:** Měnitelný atribut třídy (například seznam) je sdílen mezi všemi instancemi, což vede k nečekanému chování — jde o obdobu měnitelného výchozího argumentu funkce (viz [materiál o psaní funkcí](jak-psat-funkce.md), kapitola 2).
 > ```python
 > class Kosik:
 >     polozky = []                    # CHYBA: sdílený seznam
@@ -113,7 +128,7 @@ dvojnasobek = Nasobic(2)
 print(dvojnasobek(10))                    # 20 — instance volaná jako funkce
 ```
 
-> **Rozdíl mezi `__repr__` a `__str__`:** `__str__` je určena pro člověka (čitelný výstup, například v uživatelském rozhraní), `__repr__` pro vývojáře (jednoznačný, ladicí výstup). Není-li `__str__` definována, použije se `__repr__`. Právě `__repr__` je zásadní při ladění a zaznamenávání objektů do logu (viz materiál o logování).
+> **Rozdíl mezi `__repr__` a `__str__`:** `__str__` je určena pro člověka (čitelný výstup, například v uživatelském rozhraní), `__repr__` pro vývojáře (jednoznačný, ladicí výstup). Není-li `__str__` definována, použije se `__repr__`. Právě `__repr__` je zásadní při ladění a zaznamenávání objektů do logu (viz [materiál o logování](../02-overovani-a-ladeni/logovani.md)).
 
 > **Další čtení:** oficiální dokumentace, [Special method names](https://docs.python.org/3/reference/datamodel.html#special-method-names).
 
@@ -144,7 +159,7 @@ t = Teplota(25)
 print(t.fahrenheit)                       # 77.0 — počítá se při každém přístupu
 ```
 
-Zápis se znakem `@` (například `@property`) je tzv. **dekorátor** — mechanismus, jímž se upravuje chování metody. Jeho podrobný výklad je předmětem samostatného materiálu o dekorátorech; zde postačí vědět, že `@property` mění způsob přístupu k metodě tak, aby se používala jako atribut.
+Zápis se znakem `@` (například `@property`) je tzv. **dekorátor** — mechanismus, jímž se upravuje chování metody. Zde postačí vědět, že `@property` mění způsob přístupu k metodě tak, aby se používala jako atribut.
 
 > **Další čtení:** oficiální dokumentace, funkce [`property`](https://docs.python.org/3/library/functions.html#property).
 
@@ -182,7 +197,7 @@ class Prevodnik:
         return cls()
 ```
 
-Zápisy `@staticmethod` a `@classmethod` jsou opět dekorátory; jejich mechanismus rozebírá samostatný materiál o dekorátorech.
+Zápisy `@staticmethod` a `@classmethod` jsou opět dekorátory.
 
 ## 7. Dědičnost
 
@@ -209,7 +224,7 @@ s = Stene("Punťa", 1)
 print(s.jmeno, s.zvuk())                  # Punťa Haf
 ```
 
-Při obecném předávání argumentů předkovi se používá zápis `super().__init__(*args, **kwargs)`; mechanismus `*args`/`**kwargs` (proměnný počet argumentů) je podrobně vysvětlen v materiálu o dekorátorech, kde je nezbytný.
+Při obecném předávání argumentů předkovi se používá zápis `super().__init__(*args, **kwargs)`, v němž `*args`/`**kwargs` zastupuje proměnný počet argumentů.
 
 > **Upozornění:** Dědičnost svádí k budování hlubokých hierarchií, což je častý antivzor — kód se stává nepřehledným a změna v předkovi má nečekané důsledky u potomků. Hierarchie je vhodné držet mělké. Základnějším důvodem pro použití třídy ostatně není dědičnost, nýbrž sdružení stavu a chování (kapitola 1); dědičnost je až prostředek pro sdílení a specializaci.
 
@@ -268,7 +283,7 @@ print(b)                       # Bod(x=1.0, y=2.0)   — __repr__ vygenerováno
 print(b == Bod(1.0, 2.0))      # True                — __eq__ vygenerováno
 ```
 
-Bez dekorátoru by bylo nutné ručně napsat `__init__`, `__repr__` i `__eq__` (viz kapitoly 2 a 4). Zápis polí využívá typové anotace (viz materiál o typování) a `@dataclass` je opět dekorátor (viz samostatný materiál). Datové třídy jsou zároveň hlavním moderním argumentem pro volbu třídy tam, kde jde o seskupení souvisejících dat — což je předmětem navazujícího materiálu o rozhodování mezi třídou a funkcí.
+Bez dekorátoru by bylo nutné ručně napsat `__init__`, `__repr__` i `__eq__` (viz kapitoly 2 a 4). Zápis polí využívá typové anotace (viz [materiál o typování](typovani-promennych.md)) a `@dataclass` je opět dekorátor. Datové třídy jsou zároveň hlavním moderním argumentem pro volbu třídy tam, kde jde o seskupení souvisejících dat.
 
 > **Další čtení:** oficiální dokumentace, modul [`dataclasses`](https://docs.python.org/3/library/dataclasses.html).
 

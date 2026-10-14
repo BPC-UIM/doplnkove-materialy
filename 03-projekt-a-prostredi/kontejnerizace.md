@@ -28,6 +28,37 @@ Tři technologie se liší tím, co izolují a co sdílejí s hostitelským poč
 
 Kontejner tedy není virtuální stroj: neobsahuje vlastní jádro operačního systému, nýbrž využívá jádro hostitele. Proto se spouští během zlomku sekundy a jeho výkon je prakticky shodný s během programu přímo na hostiteli.
 
+```mermaid
+flowchart TB
+    subgraph VENV["Virtuální prostředí"]
+        V1["balíčky Pythonu"]
+    end
+    subgraph KONT["Kontejner"]
+        direction TB
+        K1["balíčky Pythonu"] --- K2["interpret"] --- K3["systémové knihovny,<br/>uživatelský prostor OS"]
+    end
+    subgraph VM["Virtuální stroj"]
+        direction TB
+        M1["balíčky Pythonu"] --- M2["interpret"] --- M3["systémové knihovny,<br/>uživatelský prostor OS"] --- M4["vlastní jádro OS"]
+    end
+
+    H1["interpret, systémové knihovny<br/>a OS hostitele"]
+    H2["jádro OS hostitele"]
+    HV["hypervizor"]
+    HW["hardware"]
+
+    VENV --> H1 --> H2 --> HW
+    KONT --> H2
+    VM --> HV --> HW
+```
+
+Textový popis schématu:
+
+- Uvnitř každého rámečku je to, co daná technologie izoluje; šipky vedou k částem, které sdílí s hostitelem.
+- Virtuální prostředí izoluje pouze balíčky Pythonu a využívá interpret, systémové knihovny i operační systém hostitele.
+- Kontejner obsahuje vlastní interpret a uživatelský prostor operačního systému, sdílí však jádro hostitele.
+- Virtuální stroj obsahuje i vlastní jádro a s hostitelem sdílí pouze hardware, k němuž přistupuje prostřednictvím hypervizoru.
+
 > **Poznámka:** Kontejnery v podobě popsané v tomto materiálu vyžadují jádro systému Linux. Na systémech Windows a macOS proto Docker spouští kontejnery uvnitř skrytého virtuálního stroje s Linuxem (na Windows prostřednictvím WSL 2). Pro uživatele je tento mezikrok téměř neviditelný, projevuje se však nižší rychlostí přístupu k souborům sdíleným mezi hostitelem a kontejnerem.
 
 ## 3. Základní pojmy
@@ -176,7 +207,7 @@ tep,tlak
 77,125
 ```
 
-Aplikace přijímá cesty ke vstupu a výstupu jako parametry příkazové řádky, nikoli jako pevně zapsané cesty v kódu. Díky tomu ji lze beze změny spustit na hostiteli i v kontejneru, kde jsou data připojena do jiné složky (k cestám v projektu viz materiál o struktuře projektu). Spuštění bez kontejneru:
+Aplikace přijímá cesty ke vstupu a výstupu jako parametry příkazové řádky, nikoli jako pevně zapsané cesty v kódu. Díky tomu ji lze beze změny spustit na hostiteli i v kontejneru, kde jsou data připojena do jiné složky (k cestám v projektu viz [materiál o struktuře projektu](struktura-projektu.md), kapitola 8). Spuštění bez kontejneru:
 
 ```bash
 python statistika.py --vstup data/mereni.csv --vystup vystupy
@@ -243,7 +274,7 @@ Význam jednotlivých pokynů:
 
 ### 6.3 Soubor .dockerignore
 
-Při sestavení se obsah složky projektu (tzv. kontext sestavení) předává službě Docker. Soubor `.dockerignore` z něj vyřadí, co do obrazu nepatří — data, výsledky, tajné údaje a mezivýsledky:
+Při sestavení se obsah složky projektu (tzv. kontext sestavení) předává službě Docker. Soubor `.dockerignore` z něj vyřadí, co do obrazu nepatří — data, výsledky, tajné údaje a mezivýsledky (obdobně jako soubor `.gitignore`, viz [materiál o gitu](../00-git/git-github-pripomenuti.md), kapitola 12):
 
 ```text
 data/
@@ -358,7 +389,7 @@ docker load -i statistika.tar                      # na cílovém počítači
 
 **Pořadí pokynů a mezipaměť vrstev.** Docker každou vrstvu ukládá do mezipaměti a při dalším sestavení ji znovu použije, pokud se nezměnil pokyn ani soubory, z nichž vrstva vzniká. Jakmile se jedna vrstva změní, sestavují se znovu i všechny následující. Pokyny se proto řadí od nejméně měněných po nejčastěji měněné: nejprve instalace závislostí, poté kód aplikace (jak ukazuje předpis v kapitole 6). Při opačném pořadí by každá změna kódu vyvolala novou instalaci všech knihoven.
 
-**Zafixované verze.** Reprodukovatelnost vyžaduje zafixovat verzi základního obrazu i knihoven. Knihovny se uvádějí s přesnou verzí (`numpy==2.1.3`, viz materiál o reprodukovatelnosti). Základní obraz se nejpřesněji zafixuje otiskem:
+**Zafixované verze.** Reprodukovatelnost vyžaduje zafixovat verzi základního obrazu i knihoven. Knihovny se uvádějí s přesnou verzí (`numpy==2.1.3`). Základní obraz se nejpřesněji zafixuje otiskem:
 
 ```dockerfile
 FROM python:3.12-slim@sha256:<otisk>
@@ -376,7 +407,7 @@ RUN apt-get update \
 
 **Uživatel bez oprávnění správce.** Pokyn `USER` zajistí, že aplikace neběží s oprávněním správce; případná chyba v aplikaci pak nemá oprávnění měnit systém kontejneru.
 
-**Data a tajné údaje do obrazu nepatří.** Data se připojují při spuštění (kapitola 9). Tajný údaj zkopírovaný do kterékoli vrstvy zůstane v obrazu uložen, i když jej pozdější pokyn smaže, a je dostupný každému, kdo obraz získá.
+**Data a tajné údaje do obrazu nepatří.** Data se připojují při spuštění (kapitola 9). Tajný údaj zkopírovaný do kterékoli vrstvy zůstane v obrazu uložen, i když jej pozdější pokyn smaže, a je dostupný každému, kdo obraz získá (ke správě tajných údajů viz [materiál o konfiguraci](konfiguracni-soubory.md), kapitola 4).
 
 **Jedna úloha na kontejner.** Kontejner má plnit jednu úlohu (zde výpočet statistik). Složitější systémy se skládají z více kontejnerů (kapitola 12).
 
@@ -518,9 +549,9 @@ docker run --rm -e LOG_LEVEL=DEBUG statistika:1.0        # jedna proměnná
 docker run --rm --env-file .env statistika:1.0            # proměnné ze souboru
 ```
 
-Soubor `.env` s tajnými údaji se tak kontejneru zpřístupní při spuštění, aniž by se stal součástí obrazu (ke správě konfigurace a tajných údajů viz materiál o konfiguraci).
+Soubor `.env` s tajnými údaji se tak kontejneru zpřístupní při spuštění, aniž by se stal součástí obrazu (ke správě konfigurace a tajných údajů viz [materiál o konfiguraci](konfiguracni-soubory.md), kapitola 4).
 
-**Pevné cesty uvnitř kontejneru.** Uvnitř kontejneru je výhodné používat ustálené cesty (zde `/data` a `/vystup`) a skutečné umístění dat určit až připojením při spuštění. Tentýž obraz pak funguje na libovolném stroji bez úprav.
+**Pevné cesty uvnitř kontejneru.** Uvnitř kontejneru je výhodné používat ustálené cesty (zde `/data` a `/vystup`) a skutečné umístění dat určit až připojením při spuštění. Tentýž obraz pak funguje na libovolném stroji bez úprav (k cestám v projektu viz [materiál o struktuře projektu](struktura-projektu.md), kapitola 8).
 
 ## 10. Vývoj uvnitř kontejneru
 
@@ -551,9 +582,9 @@ Příkazem „Reopen in Container" editor sestaví obraz, spustí kontejner a ot
 - **Tajné údaje a data v obrazu.** Bez souboru `.dockerignore` se do obrazu snadno dostanou data, soubor `.env` či celý repozitář.
 - **Pomalé opakované sestavení.** Kopírování kódu před instalací závislostí vede k nové instalaci všech knihoven při každé změně kódu (kapitola 7).
 - **Nesoulad CUDA a ovladače.** Obraz s novější verzí CUDA vyžaduje dostatečně nový ovladač na hostiteli; jinak výpočet na grafické kartě selže.
-- **Sdílená paměť a `DataLoader`.** Docker přiděluje kontejneru ve výchozím nastavení malou sdílenou paměť (`/dev/shm`). `DataLoader` s více pracovními procesy (`num_workers > 0`, viz materiál o infrastruktuře PyTorche) ji využívá k předávání dávek a při jejím nedostatku selže. Řešením je parametr `--shm-size` (například `--shm-size=8g`), případně `--ipc=host`.
+- **Sdílená paměť a `DataLoader`.** Docker přiděluje kontejneru ve výchozím nastavení malou sdílenou paměť (`/dev/shm`). `DataLoader` s více pracovními procesy (`num_workers > 0`, viz [materiál o infrastruktuře PyTorche](../04-strojove-uceni/pytorch-infrastruktura.md), kapitola 1.2) ji využívá k předávání dávek a při jejím nedostatku selže. Řešením je parametr `--shm-size` (například `--shm-size=8g`), případně `--ipc=host`.
 - **Balíčky z domovské složky v Apptaineru.** Balíčky z `~/.local` se mohou uplatnit uvnitř kontejneru (kapitola 8.4).
-- **Ladění v kontejneru.** Na vzdáleném stroji bez grafického rozhraní se kód uvnitř kontejneru ladí konzolovým debuggerem (viz materiál o ladění debuggerem).
+- **Ladění v kontejneru.** Na vzdáleném stroji bez grafického rozhraní se kód uvnitř kontejneru ladí konzolovým debuggerem (viz [materiál o ladění debuggerem](../02-overovani-a-ladeni/ladeni-debugger.md)).
 
 ## 12. Kam dál
 

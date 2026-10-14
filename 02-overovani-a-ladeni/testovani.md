@@ -42,6 +42,20 @@ Testy se člení podle rozsahu ověřované jednotky, od nejužšího po nejšir
 
 Užší testy jsou rychlejší a přesněji lokalizují chybu; širší testy ověřují, že jednotky fungují dohromady.
 
+```mermaid
+flowchart LR
+    U["Jednotkový test<br/>jedna funkce nebo třída"]
+    I["Integrační test<br/>součinnost více jednotek"]
+    S["Smoke test<br/>běh celého programu"]
+    U -- "širší rozsah" --> I
+    I -- "širší rozsah" --> S
+```
+
+Textový popis schématu:
+
+- Zleva doprava roste rozsah ověřované části programu: od jedné funkce či třídy přes součinnost více jednotek po běh celého programu.
+- Směrem doleva roste rychlost testu a přesnost, s níž test určí místo chyby; směrem doprava roste šíře ověřeného chování.
+
 ## 4. Anatomie testu: Arrange–Act–Assert
 
 Přehledný test se člení do tří kroků, jejichž počáteční písmena tvoří pojmenování vzoru **Arrange–Act–Assert**: připravit vstupy, provést operaci, ověřit výsledek.
@@ -104,7 +118,7 @@ def test_shlukovani_je_reprodukovatelne():
     assert (a == b).all()          # stejný seed → stejný výsledek
 ```
 
-> **Rozcestník:** Problematika náhody a reprodukovatelnosti je rozsáhlá a má vlastní samostatný materiál. Podstatné zde je, že ustálení zárodku ještě nezaručuje plný determinismus.
+> **Rozcestník:** Problematika náhody a reprodukovatelnosti je rozsáhlá a má vlastní [samostatný materiál](../03-projekt-a-prostredi/reprodukovatelnost-seedy.md). Podstatné zde je, že ustálení zárodku ještě nezaručuje plný determinismus.
 
 **Očekávané chyby.** Někdy je správným chováním právě vyvolání výjimky. Ověří se konstrukcí `pytest.raises`, která test označí za úspěšný pouze tehdy, nastane-li očekávaná výjimka:
 
@@ -141,7 +155,7 @@ nástroj sám vyhledá a spustí testy podle konvence pojmenování: soubory `te
 pytest test_soubor.py::test_secti
 ```
 
-Nad rámec spouštění poskytuje `pytest` řadu pomocných prostředků, z nichž mnohé jsou zapsány dekorátory. Jejich mechanismu se věnuje samostatný materiál o dekorátorech; zde postačí ukázat jejich použití.
+Nad rámec spouštění poskytuje `pytest` řadu pomocných prostředků, z nichž mnohé jsou zapsány dekorátory; zde postačí ukázat jejich použití.
 
 **Fixtury** (`@pytest.fixture`) připravují data či prostředí sdílené více testy. Test si o fixtura řekne tím, že uvede její jméno jako svůj parametr; `pytest` za něj dosadí návratovou hodnotu fixtury:
 

@@ -12,9 +12,9 @@ Tento kontrolní seznam shrnuje zásady, podle nichž lze posoudit kvalitu jedno
 
 ## 2. Signatura
 
-- Všechny parametry i návratová hodnota mají typové anotace (viz materiál o typování).
+- Všechny parametry i návratová hodnota mají typové anotace (viz [materiál o typování](typovani-promennych.md)).
 - Parametry mají výchozí hodnoty tam, kde to odpovídá jejich povaze.
-- Výchozí hodnotou není měnitelný objekt (`list = []`, `dict = {}`); namísto něj se použije `None` a objekt se vytvoří uvnitř funkce (viz materiál o typování).
+- Výchozí hodnotou není měnitelný objekt (`list = []`, `dict = {}`), neboť výchozí objekt vzniká jen jednou a je sdílen mezi všemi voláními funkce; namísto něj se použije `None` a objekt se vytvoří uvnitř funkce.
 - Krátká signatura se zapisuje na jeden řádek:
 
   ```python
@@ -65,7 +65,7 @@ Tento kontrolní seznam shrnuje zásady, podle nichž lze posoudit kvalitu jedno
 
 - Funkce vrací jednoznačně definovanou hodnotu, případně `None`, odpovídá-li to jejímu účelu.
 - Funkce nevrací tzv. magické hodnoty (například `-1` či `""`) jako náhradu výjimky.
-- Vrací-li funkce více hodnot, použije se namísto prosté n-tice `NamedTuple` nebo `dataclass` (viz materiál o základech objektově orientovaného programování), aby byl zřejmý význam jednotlivých hodnot.
+- Vrací-li funkce více hodnot, použije se namísto prosté n-tice `NamedTuple` nebo `dataclass` (viz [materiál o základech objektově orientovaného programování](zaklady-oop.md), kapitola 9), aby byl zřejmý význam jednotlivých hodnot.
 
 ## 6. Struktura
 
@@ -76,8 +76,8 @@ Tento kontrolní seznam shrnuje zásady, podle nichž lze posoudit kvalitu jedno
 ## 7. Testovatelnost
 
 - Funkce je deterministická: pro stejné vstupy vrací stejné výstupy.
-- Funkci lze snadno otestovat, přinejmenším pro běžný průběh (tzv. šťastnou cestu) a pro hraniční případy (viz materiál o testování).
-- Má-li funkce vedlejší účinky (vstup a výstup, náhodnost, závislost na čase), je navržena tak, aby je bylo možné při testování řídit — například předáním zárodku generátoru náhody (viz materiál o reprodukovatelnosti) nebo nahrazením závislosti testovacím dvojníkem (viz materiál o testování).
+- Funkci lze snadno otestovat, přinejmenším pro běžný průběh (tzv. šťastnou cestu) a pro hraniční případy (viz [materiál o testování](../02-overovani-a-ladeni/testovani.md)).
+- Má-li funkce vedlejší účinky (vstup a výstup, náhodnost, závislost na čase), je navržena tak, aby je bylo možné při testování řídit — například předáním zárodku generátoru náhody (viz [materiál o reprodukovatelnosti](../03-projekt-a-prostredi/reprodukovatelnost-seedy.md), kapitola 5) nebo nahrazením závislosti testovacím dvojníkem (viz [materiál o testování](../02-overovani-a-ladeni/testovani.md), kapitola 7).
 
 ## 8. Příklad
 
