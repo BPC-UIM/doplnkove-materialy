@@ -20,11 +20,11 @@ flowchart TB
     EP -- "další epocha" --> DL
 ```
 
-Textový popis schématu (čísla v závorkách odkazují na kapitoly tohoto materiálu):
+Textový popis schématu (čísla v závorkách i odkazy vedou na kapitoly tohoto materiálu):
 
-- `Dataset` poskytuje jednotlivé vzorky, `DataLoader` z nich skládá dávky.
-- Každá dávka se přesune na výpočetní zařízení a proběhne tréninkový krok: vynulování gradientů, průchod modelem v trénovacím režimu, výpočet ztráty a zpětný průchod, volitelné ořezání gradientů a úprava parametrů.
-- Po zpracování všech dávek epochy následuje vyhodnocení v režimu `eval()` s vypnutým sledováním gradientů, posun učicího kroku a uložení checkpointu; poté začíná další epocha.
+- [`Dataset`](#11-dataset) poskytuje jednotlivé vzorky, [`DataLoader`](#12-dataloader) z nich skládá dávky; přitom se uplatní [transformace](#13-transformace-a-augmentace) a případně [sampler](#14-samplery).
+- Každá dávka se [přesune na výpočetní zařízení](#24-správa-zařízení) a proběhne [tréninkový krok](#31-optimizer-a-tréninkový-krok): vynulování gradientů, průchod [modelem](#21-nnmodule) v [trénovacím režimu](#25-režimy-train-a-eval), výpočet ztráty a zpětný průchod, volitelné [ořezání gradientů](#36-ořezávání-gradientů) a úprava parametrů.
+- Po zpracování všech dávek epochy následuje vyhodnocení v režimu `eval()` s [vypnutým sledováním gradientů](#33-vypnutí-sledování-gradientů), [posun učicího kroku](#32-scheduler-učicího-kroku) a [uložení checkpointu](#34-ukládání-a-obnovení-tréninku-checkpointing); poté začíná další epocha.
 
 ---
 

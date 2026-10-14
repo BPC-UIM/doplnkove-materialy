@@ -65,11 +65,11 @@ Tento kontrolní seznam shrnuje zásady, podle nichž lze posoudit kvalitu jedno
 
 - Funkce vrací jednoznačně definovanou hodnotu, případně `None`, odpovídá-li to jejímu účelu.
 - Funkce nevrací tzv. magické hodnoty (například `-1` či `""`) jako náhradu výjimky.
-- Vrací-li funkce více hodnot, použije se namísto prosté n-tice `NamedTuple` nebo `dataclass` (viz [materiál o základech objektově orientovaného programování](zaklady-oop.md), kapitola 9), aby byl zřejmý význam jednotlivých hodnot.
+- Vrací-li funkce více hodnot, použije se namísto prosté n-tice `NamedTuple` nebo `dataclass` (viz [materiál o základech objektově orientovaného programování](zaklady-oop.md), kapitola 10), aby byl zřejmý význam jednotlivých hodnot.
 
 ## 6. Struktura
 
-- Funkce má jedinou odpovědnost (princip jediné odpovědnosti, *Single Responsibility Principle*).
+- Funkce má jedinou odpovědnost (princip jediné odpovědnosti, *Single Responsibility Principle*; pro třídy jej spolu s dalšími zásadami SOLID vykládá [materiál o základech objektově orientovaného programování](zaklady-oop.md), kapitola 11).
 - Funkce je krátká a přehledná, orientačně do přibližně 20 řádků.
 - Delší funkce se rozdělí na několik menších pomocných funkcí.
 
