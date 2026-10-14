@@ -191,6 +191,10 @@ plt.tight_layout()
 plt.show()
 ```
 
+![Dva panely s růstem tříd složitosti: vlevo malé vstupy na lineární ose, kde se křivky kříží; vpravo větší vstupy na logaritmické ose, kde je pořadí tříd od O(1) po O(2^n) jednoznačné](../scripts/graphs/profilovani_tridy-slozitosti.svg)
+
+*Výstup uvedeného příkladu; obrázek vytváří skript [scripts/profilovani.py](../scripts/profilovani.py).*
+
 Levý panel zobrazuje malé vstupy na lineární ose. Křivky se zde kříží: například pro `n = 3` vychází `n^2 = 9`, kdežto `2^n = 8`, takže exponenciální třída leží v tomto úseku pod kvadratickou. Zápis velkého O totiž popisuje chování pro **velká** `n`; u malých vstupů rozhodují konstanty a členy nižšího řádu.
 
 Pravý panel zobrazuje větší vstupy na logaritmické ose y, na níž je pořadí tříd jednoznačné: pro `n = 40` dosahuje `2^n` řádově $10^{12}$ operací, kdežto `n^2` pouze 1600. Exponenciální růst se na logaritmické ose zobrazuje jako přímka. Pravý panel začíná hodnotou `n = 2`, neboť $\log_2 1 = 0$ a nulu nelze na logaritmické ose zobrazit.
@@ -316,6 +320,10 @@ print(maska.sum())                            # 2 — počet hodnot nad prahem
 ### 9.3 Broadcasting
 
 Operace mezi poli **různého tvaru** umožňuje mechanismus **broadcasting**. Tvary obou polí se porovnávají od posledního rozměru; dva rozměry jsou slučitelné, jsou-li shodné, nebo je-li jeden z nich roven 1, a chybějící rozměr se považuje za 1. Rozměr velikosti 1 se pro výpočet rozšíří na velikost druhého pole, aniž by se data fyzicky kopírovala.
+
+![Dva příklady broadcastingu: nahoře pole tvaru (3, 2) minus pole tvaru (2,), které se rozšíří na tři řádky; dole sloupec tvaru (4, 1) minus řádek tvaru (1, 3), které se oba rozšíří na tvar (4, 3); rozšířené buňky jsou šrafované](../scripts/graphs/profilovani_broadcasting.svg)
+
+*Obrázek vytváří skript [scripts/profilovani.py](../scripts/profilovani.py). Horní příklad odpovídá standardizaci sloupců níže; dolní odpovídá výpočtu matice vzdáleností níže, v němž je pro přehlednost vynechán rozměr příznaků `d`.*
 
 Typickým příkladem je standardizace sloupců matice, tedy odečtení průměru a vydělení směrodatnou odchylkou každého sloupce:
 
@@ -461,6 +469,10 @@ print(A.T.flags["C_CONTIGUOUS"])        # False
 ```
 
 Transpozice tedy data nekopíruje; pouze prohodí kroky, takže výsledné pole již není řádkově souvislé.
+
+![Matice 3 × 4 s prvky 0 až 11 a pod ní dvě posloupnosti buněk v pořadí uložení v paměti: po řádcích (0, 1, 2, …, 11; kroky 32 B a 8 B) a po sloupcích (0, 4, 8, 1, 5, 9, …; kroky 8 B a 32 B)](../scripts/graphs/profilovani_ulozeni-v-pameti.svg)
+
+*Obrázek vytváří skript [scripts/profilovani.py](../scripts/profilovani.py). Barva buňky označuje řádek matice; při uložení po řádcích tvoří každý řádek souvislý úsek, při uložení po sloupcích jsou jeho prvky rozptýleny.*
 
 Rychlejší je čtení **podél té osy, která je v paměti souvislá**. Rozdíl se však neprojeví u každé operace: funkce NumPy jako `sum` pořadí průchodu samy přizpůsobují uložení pole. Zřetelně se projeví tam, kde operace musí číst data v nesouvislém pořadí — například při kombinaci pole s jeho transpozicí:
 

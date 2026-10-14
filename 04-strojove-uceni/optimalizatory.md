@@ -127,6 +127,12 @@ $$\theta_{t+1} = \theta_t - \eta\,\frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \varepsilo
 
 > **Implementace:** dokumentace PyTorche, [`torch.optim.Adam`](https://docs.pytorch.org/docs/2.14/generated/torch.optim.Adam.html) a [`torch.optim.AdamW`](https://docs.pytorch.org/docs/2.14/generated/torch.optim.AdamW.html).
 
+**Srovnání drah.** Následující obrázek ukazuje prvních 40 kroků tří dosud popsaných postupů v protáhlém údolí, kde je ztrátová funkce strmá ve směru $\theta_2$ a plochá ve směru $\theta_1$ (omezení 2 z kapitoly 1). Gradientní sestup kmitá napříč údolím a podél něj postupuje pomalu. Moment kmitání tlumí a ve stejném počtu kroků se dostane blíže k minimu. Adam upravuje krok pro každý parametr zvlášť, a postupuje proto v obou směrech srovnatelně rychle.
+
+![Vrstevnice protáhlého údolí s drahami tří optimalizátorů ze stejného počátečního bodu: gradientní sestup kmitá napříč údolím, sestup s momentem kmitá méně a postupuje rychleji, Adam postupuje plynulým obloukem až k minimu](../scripts/graphs/optimalizatory_trajektorie.svg)
+
+*Obrázek vytváří skript [scripts/optimalizatory.py](../scripts/optimalizatory.py), který předpisy z kapitol 2, 3 a 6 implementuje přímo v knihovně NumPy.*
+
 ## 7. Další varianty v torch.optim
 
 Knihovna PyTorch obsahuje řadu dalších variant, které vycházejí z výše uvedených myšlenek:

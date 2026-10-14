@@ -1,0 +1,26 @@
+# Python — přeložené soubory a mezipaměti
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# virtuální prostředí
+.venv/
+venv/
+env/
+
+# tajné údaje a lokální nastavení
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# sestavení balíčků
+build/
+dist/
+*.egg-info/
+
+# soubory operačních systémů
+.DS_Store
+Thumbs.db

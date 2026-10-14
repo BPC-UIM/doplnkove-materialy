@@ -20,11 +20,15 @@ Celkovou chybu předpovědi lze rozložit na tři složky:
 
 U regrese s kvadratickou ztrátovou funkcí lze očekávanou chybu v daném bodě zapsat jako součet druhé mocniny zkreslení, rozptylu a neredukovatelného šumu:
 
-```text
-očekávaná chyba = zkreslení² + rozptyl + neredukovatelný šum
-```
+$$\text{očekávaná chyba} = \text{zkreslení}^2 + \text{rozptyl} + \text{neredukovatelný šum}$$
 
 Zkreslení i rozptyl lze ovlivnit volbou modelu; neredukovatelný šum nikoli.
+
+Rozdíl mezi oběma složkami znázorňuje terč. Každý bod představuje předpověď téhož druhu modelu, natrénovaného pokaždé na jiné trénovací množině; střed terče je skutečná hodnota. Zkreslení odpovídá tomu, jak daleko od středu leží průměr bodů, rozptyl tomu, jak daleko jsou body rozptýleny kolem svého průměru.
+
+![Čtyři terče: nízké zkreslení a nízký rozptyl (body těsně u středu), nízké zkreslení a vysoký rozptyl (body rozptýlené kolem středu), vysoké zkreslení a nízký rozptyl (body těsně u sebe, mimo střed), vysoké zkreslení a vysoký rozptyl (body rozptýlené mimo střed)](../scripts/graphs/bias-variance_terc.svg)
+
+*Obrázek vytváří skript [scripts/bias_variance.py](../scripts/bias_variance.py).*
 
 ## 3. Nedoučení a přeučení
 
@@ -39,18 +43,9 @@ Charakteristickým příznakem je **rozdíl mezi trénovací a testovací chybou
 
 Zkreslení a rozptyl nelze zpravidla snižovat současně. S **rostoucí složitostí modelu** klesá zkreslení (model dokáže zachytit složitější zákonitosti), avšak roste rozptyl (model se více přizpůsobuje konkrétní množině). Celková chyba jako funkce složitosti má proto tvar písmene U: nejprve klesá, dosáhne minima a poté opět roste.
 
-```text
-chyba
-  |    \                          /
-  |     \      (celková)        /
-  |      \                    /
-  |        \__            __/
-  |           \__      __/   ← rozptyl roste
-  |   zkreslení  \____/
-  |   klesá        ↑
-  |________________|___________→ složitost modelu
-                 optimum
-```
+![Schematický průběh složek chyby v závislosti na složitosti modelu: zkreslení² klesá, rozptyl roste, neredukovatelný šum je konstantní a celková chyba má tvar písmene U s minimem v bodě optima; vlevo od optima leží oblast nedoučení, vpravo oblast přeučení](../scripts/graphs/bias-variance_u-krivka.svg)
+
+*Obrázek vytváří skript [scripts/bias_variance.py](../scripts/bias_variance.py). Průběhy jsou schematické, nikoli naměřené.*
 
 Cílem je nalézt složitost odpovídající **minimu celkové chyby**, nikoli minimu chyby trénovací.
 

@@ -46,6 +46,10 @@ Praktické aspekty strojového učení a práce s knihovnou PyTorch.
 - [Optimalizátory neuronových sítí](04-strojove-uceni/optimalizatory.md) — rodina optimalizátorů za hranicí základního gradientního sestupu.
 - [Infrastruktura PyTorche](04-strojove-uceni/pytorch-infrastruktura.md) — prostředky pro práci s daty, modely a tréninkem.
 
+### scripts
+
+Skripty, které vytvářejí obrázky použité v materiálech; hotové obrázky jsou uloženy ve složce `scripts/graphs/`. Ke čtení materiálů není jejich spouštění zapotřebí. Postup opětovného vytvoření obrázků popisuje [návod ke skriptům](scripts/README.md).
+
 ## 3. Kde začít
 
 Doporučené pořadí čtení vychází z logiky témat: nejprve git, poté psaní kódu, ověřování a ladění, dále projekt a prostředí (v rámci něj nejprve struktura projektu) a nakonec strojové učení. Materiály lze číst i samostatně, podle aktuální potřeby.
