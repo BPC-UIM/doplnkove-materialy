@@ -21,6 +21,8 @@ Zásady, které zlepšují čitelnost a kvalitu zdrojového kódu.
 - [Kontrolní seznam pro psaní funkcí](01-psani-kodu/jak-psat-funkce.md) — zásady, podle nichž lze posoudit kvalitu jednotlivé funkce.
 - [Typové anotace proměnných](01-psani-kodu/typovani-promennych.md) — účel a používání typových anotací v jazyce Python.
 - [Základy objektově orientovaného programování](01-psani-kodu/zaklady-oop.md) — třídy a objekty v jazyce Python.
+- [Dekorátory a kontextové manažery](01-psani-kodu/dekoratory.md) — funkce jako objekty, dekorátory a příkaz `with`.
+- [Výjimky a práce s chybami](01-psani-kodu/vyjimky.md) — vyvolání, zachycení a zpracování výjimek, návratové kódy a varování.
 
 ### 02-overovani-a-ladeni
 

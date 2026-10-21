@@ -84,7 +84,7 @@ Ve výpisu je u každé funkce počet volání (`ncalls`), vlastní čas (`totti
 
 ### line_profiler — po jednotlivých řádcích
 
-Potřebuje-li se zjistit, který **řádek** funkce je pomalý, slouží k tomu `line_profiler` (instaluje se zvlášť). Funkce se označí dekorátorem `@profile` a spustí nástrojem `kernprof`; výstup uvádí čas připadající na každý řádek.
+Potřebuje-li se zjistit, který **řádek** funkce je pomalý, slouží k tomu `line_profiler` (instaluje se zvlášť). Funkce se označí dekorátorem `@profile` (k dekorátorům viz [materiál o dekorátorech a kontextových manažerech](../01-psani-kodu/dekoratory.md)) a spustí nástrojem `kernprof`; výstup uvádí čas připadající na každý řádek.
 
 ### Paměť
 
@@ -241,7 +241,7 @@ Rozdíl bývá tisícinásobný, aniž by se změnila jediná operace — změni
 
 Druhým postupem s velkým dopadem je neprovádět tentýž výpočet vícekrát.
 
-**Zapamatování výsledků (memoizace).** Vrací-li funkce pro tytéž argumenty tentýž výsledek, lze jej uložit a při opakovaném volání vrátit bez přepočítání. Slouží k tomu dekorátor `functools.cache`:
+**Zapamatování výsledků (memoizace).** Vrací-li funkce pro tytéž argumenty tentýž výsledek, lze jej uložit a při opakovaném volání vrátit bez přepočítání. Slouží k tomu dekorátor `functools.cache` (viz [materiál o dekorátorech a kontextových manažerech](../01-psani-kodu/dekoratory.md), kapitola 9):
 
 ```python
 from functools import cache

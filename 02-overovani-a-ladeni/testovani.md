@@ -120,7 +120,7 @@ def test_shlukovani_je_reprodukovatelne():
 
 > **Rozcestník:** Problematika náhody a reprodukovatelnosti je rozsáhlá a má vlastní [samostatný materiál](../03-projekt-a-prostredi/reprodukovatelnost-seedy.md). Podstatné zde je, že ustálení zárodku ještě nezaručuje plný determinismus.
 
-**Očekávané chyby.** Někdy je správným chováním právě vyvolání výjimky. Ověří se konstrukcí `pytest.raises`, která test označí za úspěšný pouze tehdy, nastane-li očekávaná výjimka:
+**Očekávané chyby.** Někdy je správným chováním právě vyvolání výjimky. Ověří se konstrukcí `pytest.raises`, která test označí za úspěšný pouze tehdy, nastane-li očekávaná výjimka (ověření zprávy a varování viz [materiál o výjimkách](../01-psani-kodu/vyjimky.md), kapitola 14):
 
 ```python
 import pytest
@@ -155,7 +155,7 @@ nástroj sám vyhledá a spustí testy podle konvence pojmenování: soubory `te
 pytest test_soubor.py::test_secti
 ```
 
-Nad rámec spouštění poskytuje `pytest` řadu pomocných prostředků, z nichž mnohé jsou zapsány dekorátory; zde postačí ukázat jejich použití.
+Nad rámec spouštění poskytuje `pytest` řadu pomocných prostředků, z nichž mnohé jsou zapsány dekorátory; zde postačí ukázat jejich použití. Mechanismus dekorátorů i vzor s příkazem `yield`, který používají fixtury níže, vykládá [materiál o dekorátorech a kontextových manažerech](../01-psani-kodu/dekoratory.md), kapitoly 7 a 11.3.
 
 **Fixtury** (`@pytest.fixture`) připravují data či prostředí sdílené více testy. Test si o fixtura řekne tím, že uvede její jméno jako svůj parametr; `pytest` za něj dosadí návratovou hodnotu fixtury:
 

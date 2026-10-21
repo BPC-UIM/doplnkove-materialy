@@ -256,7 +256,7 @@ with torch.no_grad():
     predikce = model(X_test)
 ```
 
-**Přínos:** Kontext `torch.no_grad()` vypne sledování gradientů pro celý svůj blok; přísnější a rychlejší variantou je `torch.inference_mode()`. `torch.no_grad()` je zároveň kontextovým manažerem i dekorátorem (`@torch.no_grad()`).
+**Přínos:** Kontext `torch.no_grad()` vypne sledování gradientů pro celý svůj blok; přísnější a rychlejší variantou je `torch.inference_mode()`. `torch.no_grad()` je zároveň kontextovým manažerem i dekorátorem (`@torch.no_grad()`; viz [materiál o dekorátorech a kontextových manažerech](../01-psani-kodu/dekoratory.md), kapitola 11.4).
 
 > **Přesah:** Vypnutí gradientů (`no_grad`) a přepnutí režimu (`eval`) jsou dvě různé věci a při vyhodnocení jsou zpravidla potřeba obě: první ovlivňuje paměť a výpočet, druhá chování vrstev.
 

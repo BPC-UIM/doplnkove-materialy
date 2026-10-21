@@ -172,7 +172,7 @@ print(n.procent)                          # 70.0
 
 Pokus o zápis `n.objem = 60` vyvolá výjimku `ValueError`, neboť hodnota překračuje kapacitu nádrže.
 
-Zápis se znakem `@` (například `@property`) je tzv. **dekorátor** — mechanismus, jímž se upravuje chování metody. Zde postačí vědět, že `@property` mění způsob přístupu k metodě tak, aby se používala jako atribut.
+Zápis se znakem `@` (například `@property`) je tzv. **dekorátor** — mechanismus, jímž se upravuje chování metody; jeho fungování vykládá [materiál o dekorátorech a kontextových manažerech](dekoratory.md). Zde postačí vědět, že `@property` mění způsob přístupu k metodě tak, aby se používala jako atribut.
 
 > **Další čtení:** oficiální dokumentace, funkce [`property`](https://docs.python.org/3/library/functions.html#property).
 
@@ -231,7 +231,7 @@ print(a.popis())                          # Škoda, 110 kW
 print(Auto.kw_na_hp(110))                 # 147.5
 ```
 
-Zápisy `@staticmethod` a `@classmethod` jsou opět dekorátory.
+Zápisy `@staticmethod` a `@classmethod` jsou opět dekorátory (viz [materiál o dekorátorech a kontextových manažerech](dekoratory.md), kapitola 9).
 
 ## 7. Dědičnost
 
@@ -261,7 +261,7 @@ e = ElektrickeAuto("Škoda", 77)
 print(e.znacka, e.pohon())                # Škoda elektromotor
 ```
 
-Při obecném předávání argumentů předkovi se používá zápis `super().__init__(*args, **kwargs)`, v němž `*args`/`**kwargs` zastupuje proměnný počet argumentů.
+Při obecném předávání argumentů předkovi se používá zápis `super().__init__(*args, **kwargs)`, v němž `*args`/`**kwargs` zastupuje proměnný počet argumentů (podrobněji viz [materiál o dekorátorech a kontextových manažerech](dekoratory.md), kapitola 4).
 
 Příklad zároveň ukazuje slabinu dědičnosti: třída `Auto` předpokládá spalovací motor a potomek `ElektrickeAuto` musí tento předpoklad přepisovat. Pohon však není druhem auta, nýbrž jeho součástí; vhodnějším řešením je proto kompozice (kapitola 8).
 
@@ -464,7 +464,7 @@ print(r)                                  # Rozmery(delka_mm=4690, sirka_mm=1830
 print(r == Rozmery(4690, 1830, 1460))     # True — __eq__ vygenerováno
 ```
 
-Bez dekorátoru by bylo nutné ručně napsat `__init__`, `__repr__` i `__eq__` (viz kapitoly 2 a 4). Karoserie z kapitoly 8 by mohla své rozměry uchovávat právě v takovém objektu. Zápis polí využívá typové anotace (viz [materiál o typování](typovani-promennych.md)) a `@dataclass` je opět dekorátor. Datové třídy jsou zároveň hlavním moderním argumentem pro volbu třídy tam, kde jde o seskupení souvisejících dat.
+Bez dekorátoru by bylo nutné ručně napsat `__init__`, `__repr__` i `__eq__` (viz kapitoly 2 a 4). Karoserie z kapitoly 8 by mohla své rozměry uchovávat právě v takovém objektu. Zápis polí využívá typové anotace (viz [materiál o typování](typovani-promennych.md)) a `@dataclass` je opět dekorátor, tentokrát dekorátor třídy (viz [materiál o dekorátorech a kontextových manažerech](dekoratory.md), kapitola 10). Datové třídy jsou zároveň hlavním moderním argumentem pro volbu třídy tam, kde jde o seskupení souvisejících dat.
 
 > **Další čtení:** oficiální dokumentace, modul [`dataclasses`](https://docs.python.org/3/library/dataclasses.html).
 

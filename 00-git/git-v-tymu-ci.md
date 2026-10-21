@@ -303,7 +303,7 @@ Výsledek je dostupný na několika místech:
 - u pull requestu — oddíl s kontrolami (checks) uvádí stav každé úlohy a odkaz na podrobnosti,
 - u commitů v historii repozitáře — zelená značka (úspěch), červená značka (chyba), případně symbol probíhajícího běhu.
 
-**Čtení záznamu neúspěšného běhu.** Po otevření běhu se zobrazí úlohy a jejich kroky; neúspěšný krok je označen červeně. Rozbalením kroku se zobrazí jeho výstup, tedy tentýž text, který by vypsala příkazová řádka. Postup je následující:
+**Čtení záznamu neúspěšného běhu.** Po otevření běhu se zobrazí úlohy a jejich kroky; neúspěšný krok je označen červeně. Za neúspěšný se považuje krok, jehož příkaz skončil nenulovým návratovým kódem (viz [materiál o výjimkách](../01-psani-kodu/vyjimky.md), kapitola 10). Rozbalením kroku se zobrazí jeho výstup, tedy tentýž text, který by vypsala příkazová řádka. Postup je následující:
 
 1. Najít první červeně označený krok (následující kroky se kvůli zastavení úlohy neprovedly).
 2. V jeho výstupu vyhledat první chybové hlášení, nikoli poslední; následné chyby bývají jeho důsledkem.

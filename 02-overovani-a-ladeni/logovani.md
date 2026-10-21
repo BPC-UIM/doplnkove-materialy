@@ -46,7 +46,7 @@ except FileNotFoundError:
     raise                                                         # a rozhodne o toku programu
 ```
 
-Metoda `logger.exception` zaznamená kromě zprávy i výpis zásobníku (traceback), což je při ladění selhání zásadní.
+Metoda `logger.exception` zaznamená kromě zprávy i výpis zásobníku (traceback), což je při ladění selhání zásadní. Možnosti, jak se zachycenou výjimkou naložit, rozebírá [materiál o výjimkách](../01-psani-kodu/vyjimky.md), kapitola 5.
 
 > **Poznámka:** Argumenty se do zprávy vkládají zástupnými znaky (`%s`), nikoli spojováním řetězců. Formátování se pak provede pouze tehdy, je-li záznam skutečně vypisován, což šetří výpočetní čas u utlumených úrovní.
 
@@ -172,7 +172,7 @@ Do logu naopak **nepatří**:
 - **Rozsáhlé objekty** — celé datové struktury či tenzory. Zaznamenává se jejich tvar a několik statistik, nikoli obsah.
 - **Záznamy v těsné smyčce** — logování v cyklu přes velké množství prvků zahltí výstup a zpomalí program. Zaznamenávají se milníky, nikoli každý krok.
 
-> **Upozornění:** Zachytit výjimku a pouze ji potichu zaznamenat na nízké úrovni, aniž by se cokoli vyřešilo, je chybný vzor. Výjimku je třeba buď zpracovat, nebo propustit dál — nikoli předstírat, že nenastala.
+> **Upozornění:** Zachytit výjimku a pouze ji potichu zaznamenat na nízké úrovni, aniž by se cokoli vyřešilo, je chybný vzor. Výjimku je třeba buď zpracovat, nebo propustit dál — nikoli předstírat, že nenastala (příklad uvádí [materiál o výjimkách](../01-psani-kodu/vyjimky.md), kapitola 5).
 
 ## 5. Praktické příklady
 

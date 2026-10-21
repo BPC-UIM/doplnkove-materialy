@@ -51,7 +51,7 @@ Tento kontrolní seznam shrnuje zásady, podle nichž lze posoudit kvalitu jedno
 ## 4. Validace vstupů
 
 - Je-li to podstatné, funkce ověřuje typ a rozsah vstupních hodnot.
-- Při neplatném vstupu funkce vyvolá výstižnou výjimku: `TypeError` při nesprávném typu, `ValueError` při nepřípustné hodnotě správného typu.
+- Při neplatném vstupu funkce vyvolá výstižnou výjimku: `TypeError` při nesprávném typu, `ValueError` při nepřípustné hodnotě správného typu (k volbě výjimky a k obsahu její zprávy viz [materiál o výjimkách](vyjimky.md), kapitola 3).
 - Validace se provádí především na rozhraní, tj. ve funkcích volaných zvenčí, nikoli v každé interní pomocné funkci.
 
 > **Upozornění (`bool` je podtřídou `int`):** Logické hodnoty `True` a `False` jsou v jazyce Python instancemi typu `int`:
@@ -64,7 +64,7 @@ Tento kontrolní seznam shrnuje zásady, podle nichž lze posoudit kvalitu jedno
 ## 5. Návratová hodnota
 
 - Funkce vrací jednoznačně definovanou hodnotu, případně `None`, odpovídá-li to jejímu účelu.
-- Funkce nevrací tzv. magické hodnoty (například `-1` či `""`) jako náhradu výjimky.
+- Funkce nevrací tzv. magické hodnoty (například `-1` či `""`) jako náhradu výjimky (příklad důsledků uvádí [materiál o výjimkách](vyjimky.md), kapitola 1).
 - Vrací-li funkce více hodnot, použije se namísto prosté n-tice `NamedTuple` nebo `dataclass` (viz [materiál o základech objektově orientovaného programování](zaklady-oop.md), kapitola 10), aby byl zřejmý význam jednotlivých hodnot.
 
 ## 6. Struktura

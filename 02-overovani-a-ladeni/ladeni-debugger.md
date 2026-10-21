@@ -90,7 +90,7 @@ Rozlišení „kde chyba vznikla" a „odkud volání přišlo" je zásadní: ch
 The above exception was the direct cause of the following exception:
 ```
 
-(nebo `During handling of the above exception, another exception occurred:`). Čte se opět odspoda: **spodní** traceback je konečná výjimka, **horní** je její původní příčina. Obě části je třeba přečíst, neboť skutečná příčina bývá v té horní.
+(nebo `During handling of the above exception, another exception occurred:`). Čte se opět odspoda: **spodní** traceback je konečná výjimka, **horní** je její původní příčina. Obě části je třeba přečíst, neboť skutečná příčina bývá v té horní. Vznik obou druhů zřetězení s ukázkami výpisů popisuje [materiál o výjimkách](../01-psani-kodu/vyjimky.md), kapitola 6.
 
 ## 5. Zastavení běhu: breakpoint
 
