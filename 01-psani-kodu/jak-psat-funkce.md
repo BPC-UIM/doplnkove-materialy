@@ -36,7 +36,7 @@ Tento kontrolní seznam shrnuje zásady, podle nichž lze posoudit kvalitu jedno
 
 - Oba způsoby zápisu se v jedné signatuře nekombinují (tj. část parametrů na jednom řádku a zbytek pod sebou).
 
-> **Poznámka (umístění uzavírací závorky):** PEP 8 připouští odsazení uzavírací závorky na úroveň parametrů i její umístění na začátek řádku. Při odsazení na úroveň parametrů však parametry vizuálně splývají s tělem funkce, které je odsazeno stejně. Umístění na začátek řádku obě části zřetelně odděluje; tento tvar vytvářejí i nástroje pro automatické formátování kódu (`black`, `ruff format`).
+> **Poznámka (umístění uzavírací závorky):** PEP 8 připouští odsazení uzavírací závorky na úroveň parametrů i její umístění na začátek řádku. Při odsazení na úroveň parametrů však parametry vizuálně splývají s tělem funkce, které je odsazeno stejně. Umístění na začátek řádku obě části zřetelně odděluje; tento tvar vytvářejí i nástroje pro automatické formátování kódu (`black`, `ruff format`), je-li za posledním parametrem uvedena koncová čárka (viz [materiál o automatické kontrole kvality kódu](../02-overovani-a-ladeni/kontrola-kvality.md), kapitola 3.2).
 
 ## 3. Dokumentace
 

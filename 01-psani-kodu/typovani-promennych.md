@@ -108,4 +108,4 @@ pyright: 0 errors, 0 warnings, 0 informations
 
 ## 6. Doporučení pro praxi
 
-Anotovat je vhodné především **hlavičky funkcí**, nikoli každou lokální proměnnou. Na projekt se doporučuje pravidelně spouštět nástroj statické analýzy. Je třeba mít na paměti, že typová anotace představuje závazek vůči čtenáři a vůči nástroji — interpret jazyka jeho dodržení nevynucuje.
+Anotovat je vhodné především **hlavičky funkcí**, nikoli každou lokální proměnnou. Na projekt se doporučuje pravidelně spouštět nástroj statické analýzy; kontrolu celého projektu, její postupné zpřísňování a automatické spouštění popisuje [materiál o automatické kontrole kvality kódu](../02-overovani-a-ladeni/kontrola-kvality.md), kapitoly 5 a 8. Je třeba mít na paměti, že typová anotace představuje závazek vůči čtenáři a vůči nástroji — interpret jazyka jeho dodržení nevynucuje.

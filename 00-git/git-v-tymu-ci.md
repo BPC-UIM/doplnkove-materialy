@@ -245,6 +245,8 @@ Pro projekty v tomto kurzu jsou užitečné tři druhy kontrol, seřazené podle
 - **typová kontrola** (`mypy`) — odhaluje nesoulad typů bez spuštění kódu (viz [materiál o typových anotacích](../01-psani-kodu/typovani-promennych.md), kapitola 5),
 - **linter a formátovač** (`ruff`) — volitelný nástroj. Příkaz `ruff check` upozorňuje na stylové a drobné logické nedostatky, příkaz `ruff format --check` ověřuje jednotný formát kódu. Pro tým je přínosný zejména tím, že sjednocuje formát kódu a předchází sporům o něj.
 
+Nastavení nástrojů `ruff` a `mypy`, výběr pravidel a jejich zapojení do editoru a do git hooks popisuje [materiál o automatické kontrole kvality kódu](../02-overovani-a-ladeni/kontrola-kvality.md).
+
 Rozšířený příklad pro projekt s rozvržením `src/`, s oddělenými kroky:
 
 ```yaml
@@ -291,7 +293,7 @@ Kroky se provádějí **v uvedeném pořadí** a **první selhání úlohu zasta
 
 Parametr `cache: pip` ukládá stažené balíčky mezi běhy (podrobněji kapitola 10).
 
-> **Doporučení:** Do CI patří pouze kontroly, které lze stejným příkazem spustit i lokálně. Autor pak může před provedením push ověřit totéž, co ověří GitHub, a nemusí čekat na výsledek ze serveru.
+> **Doporučení:** Do CI patří pouze kontroly, které lze stejným příkazem spustit i lokálně. Autor pak může před provedením push ověřit totéž, co ověří GitHub, a nemusí čekat na výsledek ze serveru. Lokální spuštění týchž kontrol popisuje [materiál o automatické kontrole kvality kódu](../02-overovani-a-ladeni/kontrola-kvality.md), kapitola 9.
 
 > **Poznámka:** Nástroj `mypy` se spouští nad složkou se zdrojovým kódem (zde `src`). U projektu bez složky `src/` se uvede odpovídající složka nebo soubor, instalace probíhá jako v minimálním příkladu z kapitoly 5 a parametr `cache-dependency-path` se změní na `requirements.txt` (případně se vynechá).
 

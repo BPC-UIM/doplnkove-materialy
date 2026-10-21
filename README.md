@@ -29,6 +29,7 @@ Zásady, které zlepšují čitelnost a kvalitu zdrojového kódu.
 Prostředky pro ověření správnosti kódu, hledání chyb a zlepšení výkonu.
 
 - [Testování kódu](02-overovani-a-ladeni/testovani.md) — úvod do automatizovaného testování v jazyce Python.
+- [Automatická kontrola kvality kódu](02-overovani-a-ladeni/kontrola-kvality.md) — formátovač, linter a typová kontrola, git hooks a lokální integrace.
 - [Ladění kódu debuggerem](02-overovani-a-ladeni/ladeni-debugger.md) — hledání chyb pomocí debuggeru.
 - [Logování aplikací](02-overovani-a-ladeni/logovani.md) — záznam průběhu programu pomocí modulu `logging`.
 - [Profilování a výkon](02-overovani-a-ladeni/profilovani-vykon.md) — odhalení nevýkonného kódu a postupy jeho zrychlení.
