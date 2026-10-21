@@ -2,16 +2,16 @@
 
 *Výukový materiál — formátovač, linter a typová kontrola v projektu, git hooks a lokální integrace*
 
-Tento text popisuje nástroje, které kontrolují zdrojový kód automaticky, a způsob, jak je zapojit do každodenní práce. Představuje formátovač a linter `ruff`, typovou kontrolu celého projektu nástrojem `mypy`, jejich společné nastavení v souboru `pyproject.toml` a podporu ve vývojovém prostředí. Dále ukazuje, jak se kontrola spustí sama při každém commitu pomocí nástroje `pre-commit` a jak se z kontrol a testů sestaví lokální integrace, tedy ověření změny před jejím zařazením do hlavní větve. Navazuje na [materiál o typových anotacích](../01-psani-kodu/typovani-promennych.md) a [materiál o testování](testovani.md); serverovou kontrolu v GitHub Actions popisuje materiál [Git v týmu a průběžná integrace](../00-git/git-v-tymu-ci.md).
+Tento text popisuje nástroje, které kontrolují zdrojový kód automaticky, a způsob, jak je zapojit do každodenní práce. Představuje formátovač a linter `ruff`, typovou kontrolu celého projektu nástrojem `mypy`, jejich společné nastavení v souboru `pyproject.toml` a podporu ve vývojovém prostředí. Dále ukazuje, jak se kontrola spouští automaticky při každém commitu pomocí nástroje `pre-commit` a jak se z kontrol a testů sestaví lokální integrace, tedy ověření změny před jejím zařazením do hlavní větve. Navazuje na [materiál o typových anotacích](../01-psani-kodu/typovani-promennych.md) a [materiál o testování](testovani.md); serverovou kontrolu v GitHub Actions popisuje materiál [Git v týmu a průběžná integrace](../00-git/git-v-tymu-ci.md).
 
 Ukázky předpokládají Python 3.11 nebo novější. Výstupy byly pořízeny s nástroji ruff 0.17.1, mypy 2.4.0, pre-commit 4.7.0 a pytest 9.1.1 na systému Windows; na Linuxu a macOS se v cestách k souborům vypisuje lomítko (`/`) místo zpětného lomítka. Znění hlášení se mezi verzemi nástrojů může mírně lišit.
 
 ## 1. Motivace
 
-Kód, na němž pracuje více lidí nebo jeden člověk po delší dobu, se postupně stává nejednotným: různé odsazení a uvozovky, různé pořadí importů, zapomenuté nepoužívané importy. Ruční kontrola těchto drobností je nespolehlivá a odvádí pozornost od podstatného. Automatická kontrola přináší tři hlavní přínosy:
+Kód, na němž pracuje více lidí nebo jeden člověk po delší dobu, se postupně stává nejednotným: různé odsazení a uvozovky, různé pořadí importů, zapomenuté nepoužívané importy. Ruční kontrola těchto drobností je nespolehlivá a odvádí pozornost od podstatného. Automatická kontrola má tři hlavní přínosy:
 
 - **Konzistentní kód bez sporů o styl.** Podobu kódu určuje nastavení nástroje uložené v repozitáři, nikoli zvyklosti jednotlivých autorů. Otázka, zda psát jednoduché, nebo dvojité uvozovky, se rozhodne jednou a dále ji řeší nástroj.
-- **Chyby odhalené ještě před spuštěním.** Nedefinované jméno, nepoužitý import nebo předání řetězce tam, kde se očekává číslo, odhalí nástroj během zlomku sekundy, aniž by se program spouštěl. U kódu strojového učení, jehož běh se k chybnému řádku dostane třeba až po hodině tréninku, je takové včasné odhalení zvlášť přínosné.
+- **Chyby odhalené ještě před spuštěním.** Nedefinované jméno, nepoužitý import nebo předání řetězce tam, kde se očekává číslo, odhalí nástroj během zlomku sekundy, aniž by se program spouštěl. U kódu strojového učení, v němž se chybný řádek může provést například až po hodině tréninku, je takové včasné odhalení zvlášť přínosné.
 - **Revize kódu (code review) zaměřená na logiku.** Jsou-li formát a drobné nedostatky zkontrolovány automaticky, posuzovatel změny se nezabývá mezerami a pořadím importů, nýbrž tím, zda je změna správná a srozumitelná.
 
 Podstatnou vlastností je **opakovatelnost**: nástroj provádí tutéž kontrolu při každém spuštění stejně a na každém počítači se stejným nastavením a stejnou verzí nástroje dává stejný výsledek.
@@ -46,7 +46,7 @@ Textový popis schématu:
 
 ### 3.1 Co formátovač mění
 
-**Formátovač** přepíše zdrojový kód do jednotné podoby podle pevných pravidel. Mění pouze zápis: odsazení, mezery kolem operátorů, uvozovky, prázdné řádky mezi definicemi a zalomení dlouhých řádků. Nemění logiku programu, názvy proměnných ani pořadí příkazů. Příkaz `ruff format` vychází ze stylu formátovače `black` a dává prakticky shodné výsledky.
+**Formátovač** přepíše zdrojový kód do jednotné podoby podle pevných pravidel. Mění pouze zápis: odsazení, mezery kolem operátorů, uvozovky, prázdné řádky mezi definicemi a zalomení dlouhých řádků. Nemění logiku programu, názvy proměnných ani pořadí příkazů. Příkaz `ruff format` vychází ze stylu formátovače `black` a dává téměř shodné výsledky.
 
 Instalace a spuštění nad aktuální složkou:
 
@@ -84,7 +84,7 @@ JEDNOTKY = {"delka": "m", "hmotnost": "kg"}
 
 Formátovač zalomil signaturu delší než 88 znaků, doplnil mezery kolem operátorů a za čárky, odstranil mezery uvnitř závorek, rozdělil příkaz `if` na dva řádky, sjednotil uvozovky na dvojité a oddělil definici funkce od následujícího kódu dvěma prázdnými řádky podle PEP 8.
 
-Naformátovaný kód není nutně bezchybný. Linter s nastavením z kapitoly 6 u téhož kódu ohlásí nález `B905` (volání `zip()` bez parametru `strict=`): mají-li seznamy `hodnoty` a `vahy` různou délku, funkce `zip` přebývající prvky tiše vynechá a výsledek je chybný bez jakéhokoli upozornění. Takový nedostatek je předmětem další vrstvy kontroly, linteru (kapitola 4).
+Naformátovaný kód není nutně bezchybný. Linter s nastavením z kapitoly 6 u téhož kódu ohlásí nález `B905` (volání `zip()` bez parametru `strict=`): mají-li seznamy `hodnoty` a `vahy` různou délku, funkce `zip` přebývající prvky vynechá a výsledek je chybný bez jakéhokoli upozornění. Takový nedostatek je předmětem další vrstvy kontroly, linteru (kapitola 4).
 
 ### 3.2 Koncová čárka a zápis signatury
 
@@ -197,7 +197,7 @@ Found 6 errors.
 [*] 3 fixable with `--fix` (1 unsafe fix available with `--fix --unsafe-fixes`).
 ```
 
-Každý řádek uvádí soubor, řádek a sloupec, kód pravidla a popis. Značka `[*]` označuje nález, který nástroj umí opravit sám (kapitola 4.3). Nálezy odpovídají těmto skupinám pravidel:
+Každý řádek uvádí soubor, řádek a sloupec, kód pravidla a popis. Značka `[*]` označuje nález, který lze opravit automaticky (kapitola 4.3). Nálezy odpovídají těmto skupinám pravidel:
 
 | Předpona | Skupina | Nález v ukázce |
 |---|---|---|
@@ -299,7 +299,7 @@ noqa.py:12:31: RUF100 [*] Unused `noqa` directive (unused: `N803`)
 
 [Materiál o typových anotacích](../01-psani-kodu/typovani-promennych.md) v kapitole 5 ukazuje spuštění nástroje `mypy` nad jedním souborem. V projektu se kontroluje celá složka se zdrojovým kódem najednou. Teprve tak se odhalí nesoulad **mezi moduly**: funkce definovaná v jednom souboru je v jiném souboru volána s nesprávnými argumenty.
 
-Uvažujme projekt s rozvržením `src/` (viz [materiál o struktuře projektu](../03-projekt-a-prostredi/struktura-projektu.md), kapitola 7), nainstalovaný v editovatelném režimu (`pip install -e .`):
+Jako příklad slouží projekt s rozvržením `src/` (viz [materiál o struktuře projektu](../03-projekt-a-prostredi/struktura-projektu.md), kapitola 7), nainstalovaný v editovatelném režimu (`pip install -e .`):
 
 ```text
 statistiky/
@@ -559,7 +559,7 @@ Při uložení souboru se kód naformátuje, provedou se bezpečné opravy linte
 
 ### 8.1 Co je git hook
 
-**Git hook** je skript, který git spustí sám při určité události, například před vytvořením commitu (`pre-commit`) nebo před přenosem změn na server (`pre-push`). Skripty jsou uloženy ve složce `.git/hooks/` lokálního repozitáře. Skončí-li skript nenulovým návratovým kódem (viz [materiál o výjimkách](../01-psani-kodu/vyjimky.md), kapitola 10), git operaci přeruší: commit se nevytvoří, push se neprovede. Hook tak zajistí, že kontrola proběhne při každém commitu bez ohledu na to, zda ji autor spustí ručně.
+**Git hook** je skript, který git spouští automaticky při určité události, například před vytvořením commitu (`pre-commit`) nebo před operací push (`pre-push`). Skripty jsou uloženy ve složce `.git/hooks/` lokálního repozitáře. Skončí-li skript nenulovým návratovým kódem (viz [materiál o výjimkách](../01-psani-kodu/vyjimky.md), kapitola 10), git operaci přeruší: commit se nevytvoří, operace push se neprovede. Hook tak zajistí, že kontrola proběhne při každém commitu bez ohledu na to, zda ji autor spustí ručně.
 
 Složka `.git/hooks/` není součástí verzovaného obsahu repozitáře, a proto se skripty v ní nepřenášejí operacemi push a clone. Tento nedostatek řeší nástroj **pre-commit**: hooky popisuje verzovaný soubor `.pre-commit-config.yaml` v kořeni repozitáře a každý člen týmu je jedním příkazem nainstaluje do svého lokálního repozitáře. Nástroj zároveň pro každý hook připraví samostatné prostředí se zafixovanou verzí nástroje.
 
@@ -622,7 +622,7 @@ pre-commit install
 pre-commit installed at .git\hooks\pre-commit
 ```
 
-Od této chvíle proběhnou hooky při každém příkazu `git commit` i při commitu z grafického rozhraní, a to pouze nad soubory připravenými do commitu (staging, viz [materiál o práci s gitem a GitHubem](../00-git/git-github-pripomenuti.md), kapitola 3). První běh trvá déle, protože nástroj stahuje a připravuje prostředí hooků; další běhy je používají znovu. Úspěšný commit:
+Od této chvíle proběhnou hooky při každém příkazu `git commit` i při commitu z grafického rozhraní, a to pouze nad soubory zařazenými do staging (viz [materiál o práci s gitem a GitHubem](../00-git/git-github-pripomenuti.md), kapitola 3). První běh trvá déle, protože nástroj stahuje a připravuje prostředí hooků; další běhy je používají znovu. Úspěšný commit:
 
 ```text
 ruff check...............................................................Passed
@@ -649,7 +649,7 @@ src\statistiky\report.py:14: note: Right operand is of type "float | None"
 Found 2 errors in 1 file (checked 1 source file)
 ```
 
-Změny zůstávají v pracovním adresáři i ve staging beze změny. Po opravě chyby se soubor znovu připraví (`git add`) a commit se zopakuje.
+Změny zůstávají v pracovním adresáři i ve staging beze změny. Po opravě chyby se soubor znovu zařadí do staging (příkaz `git add`) a commit se zopakuje.
 
 ### 8.4 Hook, který soubory opraví
 
@@ -677,7 +677,7 @@ Příkaz `git status --short` nyní u souboru ukazuje dvě značky `M`:
 MM src/statistiky/zakladni.py
 ```
 
-První značka znamená, že ve staging je změna připravená do commitu (původní, neopravená verze), druhá značka, že pracovní adresář obsahuje další změnu (opravy provedené hooky). Opravy se zkontrolují (`git diff`), připraví do staging a commit se zopakuje:
+První značka znamená, že ve staging je změna určená pro commit (původní, neopravená verze), druhá značka, že pracovní adresář obsahuje další změnu (opravy provedené hooky). Opravy se zkontrolují (`git diff`), zařadí do staging a commit se zopakuje:
 
 ```bash
 git diff                      # kontrola oprav provedených hooky
@@ -685,23 +685,23 @@ git add src/statistiky/zakladni.py
 git commit -m "Přidání funkce rozpeti"
 ```
 
-Tentokrát hooky projdou a commit vznikne. V grafickém rozhraní se postupuje obdobně: opravený soubor se znovu přidá do staging a commit se zopakuje se stejným sdělením. Oblasti, mezi nimiž se změny pohybují, popisuje [materiál o práci s gitem a GitHubem](../00-git/git-github-pripomenuti.md) v kapitole 3, každodenní cyklus v kapitole 5.
+Tentokrát hooky projdou a commit vznikne. V grafickém rozhraní se postupuje obdobně: opravený soubor se znovu přidá do staging a commit se zopakuje se stejným sdělením. Oblasti, v nichž se změny nacházejí, popisuje [materiál o práci s gitem a GitHubem](../00-git/git-github-pripomenuti.md) v kapitole 3, každodenní cyklus v kapitole 5.
 
 ### 8.5 Spuštění nad celým projektem
 
-Při commitu se kontrolují jen připravené soubory. Kontrolu všech souborů v repozitáři provede příkaz:
+Při commitu se kontrolují jen soubory ve staging. Kontrolu všech souborů v repozitáři provede příkaz:
 
 ```bash
 pre-commit run --all-files
 ```
 
-Spouští se po prvním zavedení hooků, po změně nastavení nástrojů a jako součást celé kontroly před sloučením (kapitola 9).
+Spouští se po prvním zavedení hooků, po změně nastavení nástrojů a jako součást celé kontroly před operací merge (kapitola 9).
 
 ### 8.6 Obejití hooků
 
-Přepínač `--no-verify` hooky vynechá (`git commit --no-verify`, obdobně `git push --no-verify`). Nástroj pre-commit dále umožňuje vynechat jednotlivý hook proměnnou prostředí `SKIP` (například `SKIP=mypy git commit ...` v bashi).
+Přepínač `--no-verify` hooky vynechá (`git commit --no-verify`, obdobně `git push --no-verify`). Nástroj pre-commit dále umožňuje vynechat jednotlivý hook proměnnou prostředí `SKIP` (například `SKIP=mypy git commit ...` v shellu bash).
 
-Obejití hooků se nepoužívá k tomu, aby se nález nemusel opravovat. Commit s nálezem se do repozitáře dostane a selže v CI nebo u dalšího člena týmu, tedy později a pro někoho jiného. Je-li nález neoprávněný, upraví se nastavení nástroje nebo se nález v daném místě potlačí se zdůvodněním (kapitoly 4.4 a 5.3). Přípustným použitím je dočasný commit rozpracované práce na vlastní větvi, který se před sloučením opraví.
+Obejití hooků se nepoužívá k tomu, aby se nález nemusel opravovat. Commit s nálezem se tak dostane do repozitáře a chyba se projeví později, v CI nebo u jiného člena týmu. Je-li nález neoprávněný, upraví se nastavení nástroje nebo se nález v daném místě potlačí se zdůvodněním (kapitoly 4.4 a 5.3). Přípustným použitím je dočasný commit rozpracované práce na vlastní větvi, který se před operací merge opraví.
 
 ## 9. Lokální integrace
 
@@ -710,10 +710,10 @@ Obejití hooků se nepoužívá k tomu, aby se nález nemusel opravovat. Commit 
 Pojem **průběžná integrace** (continuous integration) označuje v první řadě způsob práce, nikoli službu na serveru. Spočívá ve třech zásadách:
 
 - **malé změny** — každá větev obsahuje jednu tematicky ucelenou změnu, kterou lze snadno ověřit a posoudit,
-- **časté slučování** — změny se zařazují do hlavní větve průběžně, nejlépe během několika dní, aby se větve příliš nerozcházely a nevznikaly rozsáhlé konflikty,
-- **ověření před každým sloučením** — do hlavní větve se dostane jen změna, která prošla celou kontrolou.
+- **častá integrace** — změny se zařazují do hlavní větve průběžně, nejlépe během několika dní, aby se větve od sebe příliš neodchýlily a nevznikaly rozsáhlé konflikty,
+- **ověření před každou operací merge** — do hlavní větve se dostane jen změna, která prošla celou kontrolou.
 
-Služba jako GitHub Actions (viz [materiál o gitu v týmu a průběžné integraci](../00-git/git-v-tymu-ci.md), kapitola 3) třetí zásadu automatizuje na serveru. Celou kontrolu však lze a je vhodné provést nejprve lokálně: výsledek je k dispozici okamžitě a chyba se neodhalí až po přenosu na server.
+Služba jako GitHub Actions (viz [materiál o gitu v týmu a průběžné integraci](../00-git/git-v-tymu-ci.md), kapitola 3) třetí zásadu automatizuje na serveru. Celou kontrolu však lze a je vhodné provést nejprve lokálně: výsledek je k dispozici okamžitě a chyba se neodhalí až po operaci push.
 
 ### 9.2 Postup
 
@@ -731,12 +731,12 @@ git commit -m "Přidání mediánu"        # 2. commity; hooky kontrolují každ
 pre-commit run --all-files            # 3. celá kontrola
 python -m pytest
 
-git switch main                       # 4. sloučení do main
+git switch main                       # 4. merge do main
 git pull
 git merge median
 ```
 
-V týmovém projektu se krok 4 nahrazuje pull requestem (viz [materiál o gitu v týmu a průběžné integraci](../00-git/git-v-tymu-ci.md), kapitola 2). Byla-li mezitím do `main` zařazena jiná změna, aktualizuje se vlastní větev operací merge nebo rebase (viz [materiál Historie, návraty a konflikty](../00-git/historie-navraty-konflikty.md), kapitola 11.2) a celá kontrola se zopakuje; obě změny mohou každá zvlášť projít, a přesto po spojení selhat.
+V týmovém projektu se krok 4 nahrazuje pull requestem (viz [materiál o gitu v týmu a průběžné integraci](../00-git/git-v-tymu-ci.md), kapitola 2). Byla-li mezitím do `main` zařazena jiná změna, aktualizuje se vlastní větev operací merge nebo rebase (viz [materiál Historie, návraty a konflikty](../00-git/historie-navraty-konflikty.md), kapitola 11.2) a celá kontrola se zopakuje: každá ze dvou změn může samostatně kontrolou projít, a jejich spojení přesto selhat.
 
 ### 9.3 Celá kontrola
 
@@ -765,7 +765,7 @@ tests\test_zakladni.py .....                                             [100%]
 
 Kontrola je úspěšná, pokud oba příkazy skončí kódem `0`. Testy se spouštějí zvlášť, protože jejich běh trvá déle, než je pro kontrolu každého commitu přijatelné.
 
-**Kontrola před odesláním.** Spouštění testů lze svěřit hooku `pre-push`, který proběhne při každé operaci push a neúspěšné testy push zastaví. Do souboru `.pre-commit-config.yaml` se doplní dva řádky na začátek a lokální hook na konec:
+**Kontrola před operací push.** Spouštění testů lze svěřit hooku `pre-push`, který proběhne při každé operaci push a při neúspěšných testech ji zastaví. Do souboru `.pre-commit-config.yaml` se doplní dva řádky na začátek a lokální hook na konec:
 
 ```yaml
 default_install_hook_types: [pre-commit, pre-push]
@@ -800,7 +800,7 @@ def median(hodnoty: list[float]) -> float:
     return serazene[len(serazene) // 2]
 ```
 
-Chybu odhalí teprve test a hook `pre-push` zastaví push (záhlaví výstupu nástroje pytest je zkráceno):
+Chybu odhalí teprve test a hook `pre-push` zastaví operaci push (záhlaví výstupu nástroje pytest je zkráceno):
 
 ```bash
 git push -u origin median
@@ -851,7 +851,7 @@ flowchart LR
     K -- "úspěch" --> P["Push"]
     P --> CI{"CI na serveru<br/>čisté prostředí"}
     CI -- "selhání" --> V
-    CI -- "úspěch" --> M["Sloučení<br/>do main"]
+    CI -- "úspěch" --> M["Merge<br/>do main"]
 ```
 
 Textový popis schématu:
@@ -859,7 +859,7 @@ Textový popis schématu:
 - Práce probíhá na vlastní větvi; každý commit kontrolují hooky.
 - Před operací push proběhne lokální kontrola (celá kontrola z kapitoly 9.3, případně hook `pre-push`). Při selhání se změna opraví na větvi.
 - Po operaci push spustí server tytéž kontroly v čistém prostředí. Při selhání se změna opět opraví na větvi.
-- Teprve po úspěchu obou kontrol se změna sloučí do `main`.
+- Teprve po úspěchu obou kontrol se provede merge změny do `main`.
 
 > **Přesah:** Nástroj **nox** spouští kontroly v nově vytvořeném virtuálním prostředí, do něhož se nainstaluje pouze to, co uvádí `pyproject.toml`. Lokálně tak odhalí chybějící závislost i bez serverové CI, a lze jím vyzkoušet i více verzí Pythonu. Postup se popisuje souborem `noxfile.py` v kořeni projektu:
 >
@@ -876,7 +876,7 @@ Textový popis schématu:
 >     session.run("pytest")
 > ```
 >
-> Spuštění příkazem `python -m nox` (po instalaci `pip install nox`) vytvoří prostředí ve složce `.nox/`, kterou je vhodné uvést v `.gitignore`. Každé spuštění instaluje závislosti znovu, a proto trvá řádově desítky sekund; nox se používá před odevzdáním nebo sloučením, nikoli u každého commitu.
+> Spuštění příkazem `python -m nox` (po instalaci `pip install nox`) vytvoří prostředí ve složce `.nox/`, kterou je vhodné uvést v `.gitignore`. Každé spuštění instaluje závislosti znovu, a proto trvá řádově desítky sekund; nox se používá před odevzdáním nebo před operací merge, nikoli u každého commitu.
 
 ## 10. Stejné verze nástrojů lokálně i v CI
 
@@ -907,7 +907,7 @@ Found 5 errors.
 [*] 3 fixable with `--fix` (1 unsafe fix available with `--fix --unsafe-fixes`).
 ```
 
-(Přepínač `--isolated` vynechá nastavení z `pyproject.toml`.) Projekt, který verzi nezafixoval, se po vydání nové verze rozbil v CI, aniž se v něm změnil jediný řádek.
+(Přepínač `--isolated` vynechá nastavení z `pyproject.toml`.) V projektu bez zafixované verze tak může kontrola v CI po vydání nové verze nástroje selhat, ačkoli se v kódu nezměnil jediný řádek.
 
 Verze se proto fixují na všech místech, kde se nástroj instaluje:
 
@@ -926,7 +926,7 @@ V projektu, který automatickou kontrolu dosud nepoužíval, ohlásí nástroje 
 3. **Typová kontrola.** Začíná se výchozím nastavením nástroje `mypy`, poté se přidá `check_untyped_defs` a teprve po doplnění anotací přísnější volby (kapitola 5.2).
 4. **Hooky a CI.** Po dosažení bezchybného stavu se zavedou hooky pre-commit a kontrola v CI, které tento stav udrží.
 
-**Přeformátování v samostatném commitu.** Jednorázové přeformátování změní velkou část řádků projektu. Kdyby bylo součástí commitu s věcnou změnou, posuzovatel by věcnou změnu mezi stovkami formálních změn nenašel. Přeformátování se proto provede v samostatném commitu bez jakékoli jiné úpravy, se sdělením, které tuto skutečnost uvádí (například „Přeformátování projektu nástrojem ruff format“). V týmu se commit domluví předem, protože rozpracované větve ostatních by s ním byly v konfliktu téměř na každém řádku; je vhodné jej provést v okamžiku, kdy je rozpracovaných větví co nejméně.
+**Přeformátování v samostatném commitu.** Jednorázové přeformátování změní velkou část řádků projektu. Kdyby bylo součástí commitu s věcnou změnou, věcná změna by mezi stovkami formálních změn byla pro posuzovatele obtížně dohledatelná. Přeformátování se proto provede v samostatném commitu bez jakékoli jiné úpravy, se sdělením, které tuto skutečnost uvádí (například „Přeformátování projektu nástrojem ruff format“). V týmu se termín tohoto commitu dohodne předem, protože rozpracované větve ostatních by s ním byly v konfliktu téměř na každém řádku; je vhodné jej provést v okamžiku, kdy je rozpracovaných větví co nejméně.
 
 Formátovací commit zároveň zkresluje výstup příkazu `git blame`, který u každého řádku uvádí commit poslední změny (viz [materiál Historie, návraty a konflikty](../00-git/historie-navraty-konflikty.md), kapitola 3): u většiny řádků by uváděl právě formátovací commit. Git umožňuje takové commity při zjišťování původu řádků přeskočit. Hash commitu se zapíše do souboru `.git-blame-ignore-revs` v kořeni repozitáře:
 
@@ -941,12 +941,12 @@ Uvádí se úplný hash (zde jako příklad), který vypíše například `git l
 git config blame.ignoreRevsFile .git-blame-ignore-revs
 ```
 
-GitHub tento soubor ve zobrazení původu řádků (Blame) používá sám.
+GitHub tento soubor ve zobrazení původu řádků (Blame) používá automaticky.
 
 ## 12. Časté chyby a nástrahy
 
 - **Příliš přísná pravidla na začátku.** Zapnutí mnoha skupin pravidel nebo volby `strict` v neupraveném projektu vede ke stovkám nálezů. Výsledkem bývá hromadné potlačování nebo vypnutí kontroly. Pravidla se přidávají postupně (kapitola 11).
-- **Potlačení bez zdůvodnění.** Komentáře `# noqa` a `# type: ignore` bez kódu pravidla a bez zdůvodnění skrývají i budoucí chyby a čtenáři neříkají, proč je výjimka oprávněná. Vždy se uvádí kód (`# noqa: N803`, `# type: ignore[import-untyped]`) i důvod; nepotřebné komentáře hlásí pravidlo `RUF100` a volba `warn_unused_ignores`.
+- **Potlačení bez zdůvodnění.** Komentáře `# noqa` a `# type: ignore` bez kódu pravidla a bez zdůvodnění skrývají i budoucí chyby a neuvádějí, proč je výjimka oprávněná. Vždy se uvádí kód (`# noqa: N803`, `# type: ignore[import-untyped]`) i důvod; nepotřebné komentáře hlásí pravidlo `RUF100` a volba `warn_unused_ignores`.
 - **Dva formátovače nad stejným kódem.** Používá-li část týmu `black` a část `ruff format`, případně má-li editor nastaven jiný formátovač než hooky, mohou se oba nástroje v drobnostech lišit a každý commit pak mění formát řádků po předchozím. V projektu se používá jediný formátovač, uvedený v nastavení editoru i v hooku.
 - **Rozdílné verze nástrojů.** Nezafixovaná verze, rozdíl mezi hodnotou `rev` a skupinou `dev` nebo rozšíření editoru s vlastní verzí nástroje vedou k odlišným výsledkům lokálně a v CI (kapitola 10).
 - **Hook mypy bez závislostí projektu.** Hook z repozitáře `mirrors-mypy` běží v samostatném prostředí a jeho výchozí přepínač `--ignore-missing-imports` chyby v importech skrývá; bez úprav z kapitoly 8.2 se jeho výsledek liší od příkazu `python -m mypy`.
@@ -956,6 +956,6 @@ GitHub tento soubor ve zobrazení původu řádků (Blame) používá sám.
 
 ## 13. Shrnutí
 
-Automatická kontrola kvality se skládá ze čtyř vrstev seřazených od nejrychlejší: formátovač (`ruff format`) sjednocuje zápis kódu bez změny jeho významu, linter (`ruff check`) hledá chybné a zastaralé vzory a část z nich opraví sám, typová kontrola (`mypy`) ověřuje soulad typů v celém projektu včetně vazeb mezi moduly a testy (`pytest`) ověřují chování. Nastavení všech nástrojů se uvádí v souboru `pyproject.toml`, včetně výslovného výběru pravidel linteru a postupně zpřísňované typové kontroly. Editor zobrazuje nálezy již během psaní, závazná je však kontrola spouštěná příkazem. Nástroj pre-commit spouští kontroly jako git hooks při každém commitu a hook, který skončí nenulovým kódem, commit zastaví; opravy provedené hooky je nutné znovu připravit do staging. Lokální integrace ověří každou změnu na vlastní větvi příkazy `pre-commit run --all-files` a `python -m pytest` před sloučením do `main`; serverová CI ji doplňuje kontrolou v čistém prostředí. Verze nástrojů se fixují v `.pre-commit-config.yaml` i ve skupině `dev`, aby lokální kontrola i CI dávaly stejný výsledek. Do existujícího projektu se kontrola zavádí postupně a jednorázové přeformátování se provádí v samostatném commitu.
+Automatická kontrola kvality se skládá ze čtyř vrstev seřazených od nejrychlejší: formátovač (`ruff format`) sjednocuje zápis kódu bez změny jeho významu, linter (`ruff check`) hledá chybné a zastaralé vzory a část z nich opraví sám, typová kontrola (`mypy`) ověřuje soulad typů v celém projektu včetně vazeb mezi moduly a testy (`pytest`) ověřují chování. Nastavení všech nástrojů se uvádí v souboru `pyproject.toml`, včetně výslovného výběru pravidel linteru a postupně zpřísňované typové kontroly. Editor zobrazuje nálezy již během psaní, závazná je však kontrola spouštěná příkazem. Nástroj pre-commit spouští kontroly jako git hooks při každém commitu a hook, který skončí nenulovým kódem, commit zastaví; opravy provedené hooky je nutné znovu zařadit do staging. Lokální integrace ověří každou změnu na vlastní větvi příkazy `pre-commit run --all-files` a `python -m pytest` před operací merge do `main`; serverová CI ji doplňuje kontrolou v čistém prostředí. Verze nástrojů se fixují v `.pre-commit-config.yaml` i ve skupině `dev`, aby lokální kontrola i CI dávaly stejný výsledek. Do existujícího projektu se kontrola zavádí postupně a jednorázové přeformátování se provádí v samostatném commitu.
 
 > **Další čtení:** dokumentace nástroje ruff, [formátovač](https://docs.astral.sh/ruff/formatter/), [linter](https://docs.astral.sh/ruff/linter/), [seznam pravidel](https://docs.astral.sh/ruff/rules/) a [nastavení editorů](https://docs.astral.sh/ruff/editors/setup/); dokumentace nástroje mypy, [konfigurační soubor](https://mypy.readthedocs.io/en/stable/config_file.html) a [chybějící importy](https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports); dokumentace nástroje [pre-commit](https://pre-commit.com/) a [nox](https://nox.thea.codes/); kapitola o git hooks v knize [Pro Git](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks).

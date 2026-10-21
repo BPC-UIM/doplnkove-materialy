@@ -2,15 +2,15 @@
 
 *Výukový materiál — funkce jako objekty, dekorátory a příkaz `with` v jazyce Python*
 
-Zápisy se znakem `@` nad definicí funkce či třídy a příkaz `with` se v pythonním kódu vyskytují velmi často: `@property`, `@dataclass`, `@pytest.fixture`, `@torch.no_grad()`, `with open(...)`. Tento materiál vykládá mechanismus, na němž oba prostředky stojí, a ukazuje, jak napsat vlastní dekorátor i vlastní kontextový manažer. Výklad postupuje od funkcí jako objektů přes uzávěry k dekorátorům a končí kontextovými manažery, které řeší příbuznou úlohu: provést určitý kód před a po bloku příkazů.
+Zápisy se znakem `@` nad definicí funkce či třídy a příkaz `with` se v pythonním kódu vyskytují velmi často: `@property`, `@dataclass`, `@pytest.fixture`, `@torch.no_grad()`, `with open(...)`. Tento materiál vykládá mechanismus, z něhož oba prostředky vycházejí, a ukazuje, jak napsat vlastní dekorátor i vlastní kontextový manažer. Výklad postupuje od funkcí jako objektů přes uzávěry k dekorátorům a končí kontextovými manažery, které řeší příbuznou úlohu: provést určitý kód před a po bloku příkazů.
 
 ## 1. Motivace
 
 Některé činnosti se opakují u mnoha funkcí, ačkoli s jejich vlastním účelem nesouvisejí: měření doby běhu, záznam volání do logu, opakování při přechodném selhání, ukládání již spočtených výsledků. Vložení takového kódu do každé funkce zvlášť vede k opakování a zatemňuje vlastní logiku funkce.
 
-**Dekorátor** tuto činnost odděluje: je to funkce, která přijme jinou funkci a vrátí její upravenou podobu, aniž by se měnil kód původní funkce. **Kontextový manažer** řeší příbuznou úlohu pro blok kódu: zajistí, že se před blokem provede příprava a po něm úklid, a to i tehdy, nastane-li v bloku výjimka.
+**Dekorátor** (decorator) tuto činnost odděluje: je to funkce, která přijme jinou funkci a vrátí její upravenou podobu, aniž by se měnil kód původní funkce. **Kontextový manažer** (context manager) řeší příbuznou úlohu pro blok kódu: zajistí, že se před blokem provede příprava a po něm úklid, a to i tehdy, nastane-li v bloku výjimka.
 
-Oba prostředky stojí na tom, že funkce je v jazyce Python objekt jako každý jiný (kapitola 2) a že vnitřní funkce má přístup k proměnným funkce vnější (kapitola 3).
+Oba prostředky vycházejí z toho, že funkce je v jazyce Python objekt jako každý jiný (kapitola 2) a že vnitřní funkce má přístup k proměnným funkce vnější (kapitola 3).
 
 ## 2. Funkce jako objekt
 
@@ -71,7 +71,7 @@ pocitadlo()
 print(pocitadlo())                  # 3
 ```
 
-> **Upozornění (pozdní vazba):** Uzávěr neuchovává hodnotu proměnné z okamžiku vytvoření, nýbrž proměnnou samotnou; její hodnota se zjišťuje až při volání. Vznikají-li uzávěry ve smyčce, odkazují všechny na tutéž proměnnou smyčky:
+> **Upozornění:** Uzávěr neuchovává hodnotu proměnné z okamžiku vytvoření, nýbrž proměnnou samotnou; její hodnota se zjišťuje až při volání (tzv. **pozdní vazba**, late binding). Vznikají-li uzávěry ve smyčce, odkazují všechny na tutéž proměnnou smyčky:
 > ```python
 > nasobice = [lambda x: x * i for i in range(3)]
 > print([f(10) for f in nasobice])        # [20, 20, 20], nikoli [0, 10, 20]
@@ -106,7 +106,7 @@ print(objem(*rozmery))              # 24
 print(objem(**parametry))           # 24
 ```
 
-Spojením obou způsobů lze argumenty přijmout a beze změny předat jiné funkci, což je přesně úloha dekorátoru:
+Spojením obou způsobů lze argumenty přijmout a beze změny předat jiné funkci, což odpovídá úloze dekorátoru:
 
 ```python
 def zaznamenej_a_zavolej(funkce, *args, **kwargs):
@@ -256,11 +256,11 @@ print(soucet_ctvercu.__doc__)       # Vrátí součet druhých mocnin čísel 0 
 print(soucet_ctvercu.__wrapped__)   # původní, neobalená funkce
 ```
 
-> **Doporučení:** Každý obal opatřete dekorátorem `@functools.wraps(funkce)`. Jde o jediný řádek, který zabrání obtížně vysvětlitelným výpisům při ladění a v logu.
+> **Doporučení:** Každý obal je vhodné opatřit dekorátorem `@functools.wraps(funkce)`. Jediný řádek kódu zabrání obtížně vysvětlitelným výpisům při ladění a v logu.
 
 ## 7. Dekorátory s parametry
 
-Má-li dekorátor přijímat vlastní parametry, například počet opakování, přibude třetí úroveň vnoření. Nejvnější funkce přijme parametry a vrátí vlastní dekorátor:
+Má-li dekorátor přijímat vlastní parametry, například počet opakování, přibude třetí úroveň vnoření. Vnější funkce přijme parametry a vrátí vlastní dekorátor:
 
 ```python
 import functools
@@ -296,7 +296,7 @@ print(stahni())
 
 Zápis `@opakuj(pokusu=3)` se vyhodnotí ve dvou krocích: nejprve volání `opakuj(pokusu=3)` vrátí funkci `dekorator`, která se poté použije jako obyčejný dekorátor. Odpovídá tedy přiřazení `stahni = opakuj(pokusu=3)(stahni)`. Stejně fungují i dekorátory s parametry z knihoven, například `@pytest.mark.parametrize(...)` nebo `@functools.wraps(funkce)`.
 
-> **Upozornění:** Dekorátor `opakuj` zachytává pouze výjimku `ConnectionError`, tedy přechodné selhání, u něhož má opakování smysl. Opakovat volání při chybě v datech nebo v kódu (`ValueError`, `TypeError`) nemá smysl, neboť každý další pokus skončí stejně. K volbě zachytávaných výjimek viz [materiál o výjimkách](vyjimky.md), kapitola 4.3.
+> **Upozornění:** Dekorátor `opakuj` zachytává pouze výjimku `ConnectionError`, tedy přechodné selhání, u něhož je opakování opodstatněné. Opakování volání při chybě v datech nebo v kódu (`ValueError`, `TypeError`) opodstatněné není, neboť každý další pokus skončí stejně. K volbě zachytávaných výjimek viz [materiál o výjimkách](vyjimky.md), kapitola 4.3.
 
 ## 8. Více dekorátorů nad jednou funkcí
 
@@ -340,7 +340,7 @@ Zápis odpovídá přiřazení `f = obal_a(obal_b(f))`. Na pořadí záleží: j
 
 ## 9. Dekorátory v knihovnách
 
-Dekorátor nemusí funkci obalovat. Může ji pouze zaznamenat, označit nebo upravit a vrátit tutéž funkci. Na tomto principu stojí například **registr**, s nímž pracují knihovny, které umožňují vybírat modely či transformace podle jména:
+Dekorátor nemusí funkci obalovat. Může ji pouze zaznamenat, označit nebo upravit a vrátit tutéž funkci. Na tomto principu je založen například **registr** (registry), s nímž pracují knihovny, které umožňují vybírat modely či transformace podle jména:
 
 ```python
 MODELY = {}
@@ -363,7 +363,7 @@ print(MODELY["stromovy"]())         # stromový model
 
 Dekorátory, s nimiž se lze setkat v ostatních materiálech této řady:
 
-| Zápis | Původ | Co dělá | Materiál |
+| Zápis | Původ | Činnost | Materiál |
 |---|---|---|---|
 | `@property` | vestavěný | metodu zpřístupní jako atribut | [OOP](zaklady-oop.md), kapitola 5 |
 | `@staticmethod`, `@classmethod` | vestavěné | změní způsob volání metody | [OOP](zaklady-oop.md), kapitola 6 |
@@ -451,7 +451,7 @@ Objekt, který lze použít v příkazu `with`, se nazývá **kontextový manaž
 Kontextový manažer je objekt se dvěma speciálními metodami:
 
 - `__enter__` se zavolá při vstupu do bloku `with`; její návratová hodnota se přiřadí proměnné za klíčovým slovem `as`,
-- `__exit__` se zavolá při opuštění bloku, a to vždy, i při výjimce. Přijímá tři argumenty popisující případnou výjimku (při běhu bez výjimky mají hodnotu `None`). Vrátí-li `True`, výjimka se potlačí; vrátí-li `False` nebo `None`, výjimka pokračuje dál.
+- `__exit__` se zavolá při opuštění bloku, a to vždy, i při výjimce. Přijímá tři argumenty popisující případnou výjimku (při běhu bez výjimky mají hodnotu `None`). Vrátí-li `True`, výjimka se potlačí; vrátí-li `False` nebo `None`, výjimka se šíří dál.
 
 ```python
 import time
@@ -464,7 +464,7 @@ class Casovac:
     def __exit__(self, typ, hodnota, traceback):
         self.trvani = time.perf_counter() - self.start
         print(f"blok trval {self.trvani:.4f} s")
-        return False                        # případná výjimka pokračuje dál
+        return False                        # případná výjimka se šíří dál
 
 with Casovac() as c:
     soucet = sum(i * i for i in range(1_000_000))
@@ -486,14 +486,14 @@ flowchart TB
     T -- "výjimka" --> X2["__exit__(typ, hodnota, traceback)"]
     X1 --> P["pokračování za blokem"]
     X2 -- "vrátí True" --> P
-    X2 -- "vrátí False nebo None" --> V["výjimka pokračuje dál"]
+    X2 -- "vrátí False nebo None" --> V["výjimka se šíří dál"]
 ```
 
 Textový popis schématu:
 
 - Při vstupu do bloku se zavolá `__enter__`, poté se provede tělo bloku.
 - Skončí-li tělo bez výjimky, zavolá se `__exit__` s argumenty `None` a program pokračuje za blokem.
-- Nastane-li v těle výjimka, zavolá se `__exit__` s údaji o výjimce. Vrátí-li `True`, výjimka se potlačí a program pokračuje za blokem; jinak výjimka pokračuje dál.
+- Nastane-li v těle výjimka, zavolá se `__exit__` s údaji o výjimce. Vrátí-li `True`, výjimka se potlačí a program pokračuje za blokem; jinak se výjimka šíří dál.
 - Metoda `__exit__` se tedy zavolá v obou případech; právě to zaručuje provedení úklidu.
 
 > **Upozornění:** Potlačení výjimky vrácením `True` z metody `__exit__` je vhodné jen výjimečně a pouze pro předem známý druh výjimky. Potlačená výjimka se jinak nikde neprojeví a chyba zůstane skryta.
@@ -530,7 +530,7 @@ Konstrukce `try`/`finally` kolem `yield` je nutná: nastane-li v bloku `with` v�
 | `contextlib.chdir(cesta)` (Python 3.11+) | změní pracovní složku | vrátí původní pracovní složku |
 | `contextlib.suppress(Vyjimka)` | — | potlačí uvedený druh výjimky |
 | `np.printoptions(precision=3)` | změní formát výpisu polí NumPy | vrátí původní formát |
-| `torch.no_grad()` | vypne sledování gradientů | zapne je zpět |
+| `torch.no_grad()` | vypne sledování gradientů | obnoví původní nastavení sledování gradientů |
 
 Příklad potlačení předem známé výjimky:
 
@@ -567,7 +567,7 @@ trenuj()
 
 ## 12. Kdy dekorátor použít a časté nástrahy
 
-Dekorátor je vhodný pro **průřezové činnosti**, které se uplatní u mnoha funkcí a s jejich vlastní logikou nesouvisejí: měření, záznam do logu, opakování, ukládání výsledků, kontrola vstupů. Pro logiku, která se týká jediné funkce, dekorátor vhodný není; kód funkce je pak přehlednější bez něj, neboť chování skryté v dekorátoru není z těla funkce patrné.
+Dekorátor je vhodný pro **průřezové činnosti** (cross-cutting concerns), které se uplatní u mnoha funkcí a s jejich vlastní logikou nesouvisejí: měření, záznam do logu, opakování, ukládání výsledků, kontrola vstupů. Pro logiku, která se týká jediné funkce, dekorátor vhodný není; kód funkce je pak přehlednější bez něj, neboť chování skryté v dekorátoru není z těla funkce patrné.
 
 **Obal nevrací výsledek.** Nejčastější chybou je opomenutí příkazu `return` v obalu. Dekorovaná funkce pak vždy vrací `None`:
 
@@ -602,7 +602,7 @@ stahni()
 - **Delší výpis chyby a krokování.** Výpis chyby (traceback) obsahuje kromě původní funkce i řádky obalu a při krokování debuggerem se vstupuje nejprve do obalu (viz [materiál o ladění debuggerem](../02-overovani-a-ladeni/ladeni-debugger.md), kapitoly 4 a 6).
 - **Pozdní vazba v uzávěrech** vytvářených ve smyčce (kapitola 3).
 
-> **Přesah (typové anotace dekorátoru):** Nástroj statické analýzy (viz [materiál o typových anotacích](typovani-promennych.md)) potřebuje vědět, že obal přijímá tytéž parametry a vrací týž typ jako původní funkce. K tomu slouží `ParamSpec` a `TypeVar` z modulu `typing`:
+> **Přesah:** Má-li nástroj statické analýzy (viz [materiál o typových anotacích](typovani-promennych.md)) ověřovat volání dekorované funkce, musí typové anotace dekorátoru vyjadřovat, že obal přijímá tytéž parametry a vrací týž typ jako původní funkce. K tomu slouží `ParamSpec` (Python 3.10+) a `TypeVar` z modulu `typing`:
 > ```python
 > import functools
 > from typing import Callable, ParamSpec, TypeVar

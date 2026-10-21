@@ -2,11 +2,11 @@
 
 *Výukový materiál — vyvolání, zachycení a zpracování výjimek v jazyce Python*
 
-Tento materiál vykládá, jak v jazyce Python s chybami zacházet tak, aby se neztratily ani neskryly: jak výjimku vyvolat s výstižnou zprávou, kdy a jak ji zachytit, co s ní po zachycení udělat a jak ji na hranici programu převést na srozumitelné hlášení a návratový kód. U každého postupu je uveden příklad i s výstupem, který se objeví v konzoli nebo v logu. Výstupy odpovídají jazyku Python 3.11; starší verze vypisují tracebacky bez značek `^^^`.
+Tento materiál vykládá, jak v jazyce Python s chybami zacházet tak, aby nezůstaly skryty: jak výjimku vyvolat s výstižnou zprávou, kdy a jak ji zachytit, co s ní po zachycení udělat a jak ji na hranici programu převést na srozumitelné hlášení a návratový kód. U každého postupu je uveden příklad i s výstupem, který se objeví v konzoli nebo v logu. Výstupy odpovídají jazyku Python 3.11; starší verze vypisují tracebacky bez značek `^^^`.
 
 ## 1. Motivace
 
-Chyba, na kterou program neupozorní, je nebezpečnější než chyba, která program zastaví. Typickým zdrojem takových chyb jsou **magické hodnoty**, jimiž funkce namísto výjimky ohlašuje neúspěch (viz [kontrolní seznam pro psaní funkcí](jak-psat-funkce.md), kapitola 5):
+Chyba, na kterou program neupozorní, je nebezpečnější než chyba, která program zastaví. Typickým zdrojem takových chyb jsou **magické hodnoty** (*magic values*), jimiž funkce namísto výjimky ohlašuje neúspěch (viz [kontrolní seznam pro psaní funkcí](jak-psat-funkce.md), kapitola 5):
 
 ```python
 def najdi_index(seznam, hodnota):
@@ -35,7 +35,7 @@ Traceback (most recent call last):
 ValueError: 25.0 is not in list
 ```
 
-**Výjimka** je objekt, který ohlašuje, že operaci nelze provést. Přeruší běžný průběh programu a šíří se k volajícímu kódu, dokud ji některá část programu nezpracuje; nezpracuje-li ji žádná, program skončí a vypíše traceback.
+**Výjimka** (*exception*) je objekt, který ohlašuje, že operaci nelze provést. Přeruší běžný průběh programu a šíří se k volajícímu kódu, dokud ji některá část programu nezpracuje; nezpracuje-li ji žádná, program skončí a vypíše traceback.
 
 ## 2. Co je výjimka
 
@@ -197,7 +197,7 @@ finally: provede se vždy
 finally: provede se vždy
 ```
 
-Kód v bloku `else` by bylo možné umístit i na konec bloku `try`. Oddělení má však smysl: výjimka vzniklá v bloku `else` se nezachytí blokem `except`, který je určen jen pro chyby převodu. Blok `try` tak obsahuje pouze operaci, jejíž selhání se očekává.
+Kód v bloku `else` by bylo možné umístit i na konec bloku `try`. Oddělení je však účelné: výjimka vzniklá v bloku `else` se nezachytí blokem `except`, který je určen jen pro chyby převodu. Blok `try` tak obsahuje pouze operaci, jejíž selhání se očekává.
 
 ```mermaid
 flowchart TD
@@ -254,9 +254,9 @@ hodnota klíče 'dropout' není číslo: float() argument must be a string or a 
 
 ## 5. Co s výjimkou po zachycení
 
-Zachycení výjimky má smysl jen tehdy, je-li s ní co užitečného udělat. Přípustné jsou čtyři možnosti.
+Zachycení výjimky je opodstatněné jen tehdy, lze-li s ní účelně naložit. Přípustné jsou čtyři možnosti.
 
-**1. Vyřešit ji.** Existuje-li rozumná náhradní hodnota nebo postup, použije se a situace se zaznamená do logu, aby nezůstala skryta:
+**1. Vyřešit ji.** Existuje-li přiměřená náhradní hodnota nebo postup, použije se a situace se zaznamená do logu, aby nezůstala skryta:
 
 ```python
 import logging
@@ -318,12 +318,12 @@ Trénink nelze zahájit bez modelu.
 
 **4. Ukončit program** se srozumitelnou zprávou a nenulovým návratovým kódem. Tato možnost náleží hranici programu (kapitola 10).
 
-> **Upozornění (spolknutí výjimky):** Zachytit výjimku a nic neudělat je nejzávažnějším chybným vzorem práce s výjimkami. Chyba nezmizí, pouze se projeví později a jinde, kde je obtížné ji spojit s příčinou:
+> **Upozornění:** Zachycení výjimky bez jakéhokoli zpracování, tzv. **spolknutí výjimky** (*swallowing an exception*), je nejzávažnějším chybným vzorem práce s výjimkami. Chyba nezmizí, pouze se projeví později a jinde, kde je obtížné ji spojit s příčinou:
 > ```python
 > try:
 >     hodnoty = [float(x) for x in ["1.5", "2,5", "3.5"]]
 > except Exception:
->     pass                            # nevhodně: chyba zmizí beze stopy
+>     pass                            # nevhodně: chyba se nijak neohlásí
 >
 > print(sum(hodnoty))
 > ```
@@ -338,7 +338,7 @@ Trénink nelze zahájit bez modelu.
 
 ## 6. Zřetězené výjimky
 
-**Výslovné zřetězení (`raise ... from`).** Při překladu výjimky na jinou (kapitola 5, možnost 2) se původní výjimka připojí jako příčina. Traceback pak obsahuje obě výjimky:
+**Výslovné zřetězení** (*explicit exception chaining*, `raise ... from`). Při překladu výjimky na jinou (kapitola 5, možnost 2) se původní výjimka připojí jako příčina. Traceback pak obsahuje obě výjimky:
 
 ```python
 import json
@@ -370,7 +370,7 @@ Traceback (most recent call last):
 ValueError: Konfigurace není platný JSON
 ```
 
-Spodní výjimka sděluje, co se stalo z pohledu volajícího kódu (konfigurace je neplatná), horní uvádí přesnou příčinu (nadbytečná čárka na 13. pozici). Bez `from chyba` by tato informace pro volající kód zůstala skryta.
+Spodní výjimka sděluje, co se stalo z pohledu volajícího kódu (konfigurace je neplatná), horní uvádí přesnou příčinu (za nadbytečnou čárkou následuje na 13. pozici uzavírací závorka namísto názvu klíče). Bez `from chyba` by Python výjimky zřetězil pouze implicitně (viz níže) a výpis by překlad nesprávně označil za chybu vzniklou při zpracování jiné chyby; mimo blok `except` by se původní výjimka do výpisu nedostala vůbec.
 
 **Implicitní zřetězení.** Nastane-li výjimka během zpracování jiné výjimky, například chybou v bloku `except`, Python zřetězí obě výjimky samočinně a odlišnou větou:
 
@@ -477,7 +477,7 @@ chybný klíč: epochy
 
 Volající kód může zachytit konkrétní výjimku (`ChybaKonfigurace`), nebo všechny výjimky projektu najednou (`ChybaProjektu`), aniž by zachytil chyby, které s projektem nesouvisejí. Ke správě a ověřování konfigurace viz [materiál o konfiguraci](../03-projekt-a-prostredi/konfiguracni-soubory.md), kapitola 5.
 
-> **Doporučení:** Vlastní výjimku zavádějte jen tam, kde ji volající kód skutečně potřebuje rozlišit. Pro běžné situace postačují vestavěné výjimky z kapitoly 3; jejich význam je všeobecně známý.
+> **Doporučení:** Vlastní výjimka se zavádí jen tam, kde ji volající kód skutečně potřebuje rozlišit. Pro běžné situace postačují vestavěné výjimky z kapitoly 3; jejich význam je všeobecně známý.
 
 ## 8. Dva přístupy: EAFP a LBYL
 
@@ -527,7 +527,7 @@ Pro prostředky, které podporují příkaz `with`, je vhodné jej používat v�
 
 ## 10. Výjimky na hranici programu
 
-**Hranicí programu** se rozumí místo, kde program komunikuje s okolím: vstupní bod spouštěný z příkazové řádky (viz vzor funkce `main()` v [materiálu o struktuře projektu](../03-projekt-a-prostredi/struktura-projektu.md), kapitola 5). Zde se rozhoduje, jak se chyba ohlásí uživateli a jakým **návratovým kódem** program skončí.
+**Hranicí programu** se rozumí místo, kde program komunikuje s okolím: vstupní bod spouštěný z příkazové řádky (viz vzor funkce `main()` v [materiálu o struktuře projektu](../03-projekt-a-prostredi/struktura-projektu.md), kapitola 5). Zde se rozhoduje, jak se chyba ohlásí uživateli a jakým **návratovým kódem** (*exit code*) program skončí.
 
 Návratový kód je číslo, které proces předá operačnímu systému: `0` znamená úspěch, nenulová hodnota selhání. Podle něj vyhodnocují úspěch skripty, plánovače úloh i průběžná integrace; neúspěšný krok ve workflow GitHub Actions je právě krok, jehož příkaz skončil nenulovým kódem (viz [materiál o gitu v týmu a průběžné integraci](../00-git/git-v-tymu-ci.md), kapitola 7).
 
@@ -568,13 +568,13 @@ Chyba konfigurace: soubor config.yaml neobsahuje klíč 'epochy'
 2
 ```
 
-Zpráva pro uživatele se vypisuje do chybového výstupu (`sys.stderr`), nikoli do standardního výstupu, aby se neprolínala s výsledky programu. Neočekávané chyby se na hranici programu nezachytávají; jejich traceback je pro vývojáře nejcennějším vodítkem.
+Zpráva pro uživatele se vypisuje do chybového výstupu (`sys.stderr`), nikoli do standardního výstupu, aby se neprolínala s výsledky programu. Neočekávané chyby se na hranici programu nezachytávají; jejich traceback je pro vývojáře nejpodstatnějším zdrojem informací o příčině.
 
 > **Poznámka:** I nástroje spouštěné v rámci kontrol používají návratové kódy: `pytest` končí kódem `0`, prošly-li všechny testy, kódem `1` při selhání testu a kódem `5`, nebyl-li nalezen žádný test.
 
 ## 11. Varování: modul `warnings`
 
-**Varování** upozorňuje na situaci, která ještě není chybou, avšak může k ní vést: zastaralé použití funkce, podezřelou hodnotu, ztrátu přesnosti. Na rozdíl od výjimky běh programu nepřeruší.
+**Varování** (*warning*) upozorňuje na situaci, která ještě není chybou, avšak může k ní vést: zastaralé použití funkce, podezřelou hodnotu, ztrátu přesnosti. Na rozdíl od výjimky běh programu nepřeruší.
 
 ```python
 import warnings
@@ -584,7 +584,7 @@ def normalizuj(x, metoda="minmax"):
         warnings.warn(
             "Metoda 'stara' bude odstraněna, použijte 'minmax'",
             DeprecationWarning,
-            stacklevel=2,                  # varování ukáže na řádek volajícího
+            stacklevel=2,                  # výpis uvede řádek volajícího kódu
         )
     return x
 
@@ -662,7 +662,7 @@ Kontrola vstupu proto patří do podmínky s příkazem `raise ValueError(...)` 
 
 ## 13. Dlouhé běhy a trénink modelů
 
-U výpočtů trvajících hodiny má selhání vyšší cenu, a práce s výjimkami proto vyžaduje zvláštní péči.
+U výpočtů trvajících hodiny má selhání závažnější důsledky, a práce s výjimkami proto vyžaduje zvláštní péči.
 
 **Opakování při přechodném selhání.** Stahování dat či přístup ke vzdálenému úložišti může selhat jen dočasně. Opakování volání při výjimce `ConnectionError` ukazuje dekorátor `@opakuj` v [materiálu o dekorátorech a kontextových manažerech](dekoratory.md), kapitola 7.
 
@@ -753,11 +753,11 @@ Traceback (most recent call last):
 FloatingPointError: divide by zero encountered in log
 ```
 
-> **Přesah (nedostatek paměti GPU):** Nevejde-li se výpočet do paměti grafické karty, vyvolá PyTorch výjimku `torch.cuda.OutOfMemoryError`. Jejím zachycením lze například zmenšit velikost dávky a pokus zopakovat. Po zachycení je vhodné uvolnit nepotřebné tenzory a volat `torch.cuda.empty_cache()`; samotné zachycení paměť neuvolní.
+> **Přesah (PyTorch):** Nevejde-li se výpočet do paměti grafické karty, vyvolá PyTorch výjimku `torch.cuda.OutOfMemoryError`. Jejím zachycením lze například zmenšit velikost dávky a pokus zopakovat. Po zachycení je vhodné uvolnit nepotřebné tenzory a volat `torch.cuda.empty_cache()`; samotné zachycení paměť neuvolní.
 
 ## 14. Testování výjimek
 
-Vyvolání správné výjimky je součástí chování funkce a ověřuje se testem. Konstrukce `pytest.raises` test označí za úspěšný jen tehdy, nastane-li v jejím bloku očekávaná výjimka; parametr `match` navíc ověří zprávu (jde o regulární výraz hledaný ve zprávě). Konstrukce `pytest.warns` obdobně ověřuje varování (viz [materiál o testování](../02-overovani-a-ladeni/testovani.md), kapitoly 7 a 8):
+Vyvolání správné výjimky je součástí chování funkce a ověřuje se testem. Konstrukce `pytest.raises` test označí za úspěšný jen tehdy, nastane-li v jejím bloku očekávaná výjimka; parametr `match` navíc ověří zprávu (jde o regulární výraz hledaný ve zprávě). Konstrukce `pytest.warns` obdobně ověřuje varování. Základní použití `pytest.raises` a práci s nástrojem pytest popisuje [materiál o testování](../02-overovani-a-ladeni/testovani.md), kapitoly 7 a 8.
 
 ```python
 import pytest
@@ -791,8 +791,8 @@ def test_varovani():
 
 - **Spolknutí výjimky** (`except: pass`, `except Exception: pass`). Chyba se projeví později a jinde (kapitola 5).
 - **Příliš obecné zachycení.** `except Exception` zachytí i chyby v kódu samotném, například překlep v názvu proměnné (kapitola 4.3).
-- **Ztráta příčiny.** Překlad výjimky bez `from chyba` zbaví volajícího informace o skutečném původu chyby (kapitola 6).
-- **Zpráva bez kontextu.** Zpráva „Neplatná hodnota" neuvádí, která hodnota a proč (kapitola 3).
+- **Ztráta příčiny.** Překlad výjimky bez `from chyba` zastírá, že jde o záměrný překlad, a výjimka vyvolaná mimo blok `except` původní výjimku vůbec nenese (kapitola 6).
+- **Zpráva bez kontextu.** Zpráva „Neplatná hodnota“ neuvádí, která hodnota a proč (kapitola 3).
 - **Magické hodnoty místo výjimek.** Návratová hodnota `-1` či `None` jako ohlášení chyby se snadno přehlédne (kapitola 1).
 - **`assert` pro kontrolu vstupů.** Při spuštění s přepínačem `-O` se neprovede (kapitola 12).
 - **Zaznamenání výjimky na více místech.** Zaznamená-li výjimku do logu každá úroveň, kterou prochází, objeví se v logu několikrát. Výjimka se zaznamenává tam, kde se zpracuje, nebo jednou na hranici programu.
@@ -800,6 +800,6 @@ def test_varovani():
 
 ## 16. Shrnutí
 
-Výjimka ohlašuje, že operaci nelze provést, a šíří se zásobníkem volání, dokud ji některá část programu nezpracuje. Vyvolává se příkazem `raise` s třídou odpovídající druhu chyby a se zprávou, která uvádí hodnotu i očekávání. Zachycuje se konstrukcí `try`/`except`, a to co nejkonkrétnější třídou a v co nejkratším bloku; `else` odděluje kód závislý na úspěchu, `finally` se provede vždy. Zachycenou výjimku je třeba vyřešit, přeložit s připojením příčiny (`raise ... from`), zaznamenat a propustit, nebo na hranici programu převést na srozumitelnou zprávu a nenulový návratový kód; spolknout ji nelze. Vlastní výjimky dědí z třídy `Exception` a jsou přínosné tam, kde je volající kód potřebuje rozlišit. Prostředky se uvolňují příkazem `with`, varování se vydávají modulem `warnings`, `assert` slouží k ověření předpokladů, nikoli vstupů. U dlouhých běhů se při přerušení ukládá stav a neplatné číselné hodnoty se zachycují v okamžiku vzniku.
+Výjimka ohlašuje, že operaci nelze provést, a šíří se zásobníkem volání, dokud ji některá část programu nezpracuje. Vyvolává se příkazem `raise` s třídou odpovídající druhu chyby a se zprávou, která uvádí hodnotu i očekávání. Zachycuje se konstrukcí `try`/`except`, a to co nejkonkrétnější třídou a v co nejkratším bloku; `else` odděluje kód závislý na úspěchu, `finally` se provede vždy. Zachycenou výjimku je třeba vyřešit, přeložit s připojením příčiny (`raise ... from`), zaznamenat a propustit, nebo na hranici programu převést na srozumitelnou zprávu a nenulový návratový kód; ponechat ji bez zpracování je chybou. Vlastní výjimky dědí z třídy `Exception` a jsou přínosné tam, kde je volající kód potřebuje rozlišit. Prostředky se uvolňují příkazem `with`, varování se vydávají modulem `warnings`, `assert` slouží k ověření předpokladů, nikoli vstupů. U dlouhých běhů se při přerušení ukládá stav a neplatné číselné hodnoty se zachycují v okamžiku vzniku.
 
 > **Další čtení:** oficiální dokumentace, kapitola [Errors and Exceptions](https://docs.python.org/3/tutorial/errors.html), [hierarchie vestavěných výjimek](https://docs.python.org/3/library/exceptions.html#exception-hierarchy), modul [`warnings`](https://docs.python.org/3/library/warnings.html); [PEP 3134 — Exception Chaining and Embedded Tracebacks](https://peps.python.org/pep-3134/); [PEP 678 — Enriching Exceptions with Notes](https://peps.python.org/pep-0678/).
