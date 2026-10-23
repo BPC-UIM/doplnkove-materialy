@@ -176,7 +176,7 @@ Tímto způsobem lze udržovat hlavní soubor s odkazy na dílčí konfigurace a
 | `dynaconf` | správa konfigurace s vrstvením, prostředími a tajnými údaji |
 | `OmegaConf` | hierarchická konfigurace, slučování, interpolace |
 
-Nad knihovnou `OmegaConf` je vystavěn nástroj **Hydra**, určený pro rozsáhlou kompozici konfigurací (zejména ve výzkumu a strojovém učení). Jeho podrobný výklad přesahuje rozsah tohoto materiálu.
+Nad knihovnou `OmegaConf` je vystavěn nástroj **Hydra**, určený pro rozsáhlou kompozici konfigurací (zejména ve výzkumu a strojovém učení). Jeho výklad, včetně skupin konfigurací, přepisů z příkazové řádky a prohledávání parametrů, podává [materiál o správě experimentů](sprava-experimentu.md), kapitoly 4 a 5.
 
 ## 8. Časté chyby a nástrahy
 
@@ -188,4 +188,4 @@ Nad knihovnou `OmegaConf` je vystavěn nástroj **Hydra**, určený pro rozsáhl
 
 ## 9. Doporučený postup
 
-Pro **menší projekt** zpravidla postačí jeden soubor TOML doplněný o `.env` pro citlivé údaje, načtený a ověřený knihovnou `pydantic-settings`. Pro **rozsáhlejší projekt** s mnoha variantami nastavení je vhodné sáhnout po nástroji s podporou skládání konfigurace (`OmegaConf`, případně Hydra). V každém případě platí: konfiguraci načítejte na jediném místě, citlivé údaje držte mimo verzování a očekávanou strukturu popište typovaným modelem.
+Pro **menší projekt** zpravidla postačí jeden soubor TOML doplněný o `.env` pro citlivé údaje, načtený a ověřený knihovnou `pydantic-settings`. Pro **rozsáhlejší projekt** s mnoha variantami nastavení je vhodné zvolit nástroj s podporou skládání konfigurace (`OmegaConf`, případně Hydra; viz [materiál o správě experimentů](sprava-experimentu.md)). V každém případě platí: konfigurace se načítá na jediném místě, citlivé údaje zůstávají mimo verzování a očekávaná struktura je popsána typovaným modelem.

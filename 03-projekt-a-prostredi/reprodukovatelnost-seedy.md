@@ -140,8 +140,8 @@ Reprodukovatelnost není vlastností jediného řádku kódu, nýbrž celého z�
 - **použitý seed** — patří mezi konfigurační parametry projektu, a je tedy vhodné jej uvádět v konfiguračním souboru, nikoli jej „zadrátovat" do kódu,
 - **verze knihoven** — odlišná verze může vést k odlišnému výsledku i při stejném seedu, proto je nutné verze zafixovat (viz [materiál o kontejnerizaci](kontejnerizace.md), kapitola 7).
 
-Seed je tedy typický konfigurovatelný parametr; jeho začlenění do konfigurace zároveň zajistí, že bude spolu s ostatními parametry experimentu zaznamenán.
+Seed je tedy typický konfigurovatelný parametr; jeho začlenění do konfigurace zároveň zajistí, že bude spolu s ostatními parametry experimentu zaznamenán. Úplný záznam běhu (konfigurace, verze kódu, prostředí, otisk dat a výstupy) a opakování běhů přes více seedů popisuje [materiál o správě experimentů](sprava-experimentu.md), kapitoly 2 a 5.
 
 ## 9. Doporučený postup
 
-Na začátku programu nastavte seed **u všech** použitých generátorů (standardní knihovna, NumPy, framework). Tam, kde je to možné, upřednostněte **lokální generátory** a výslovné předávání seedu před globálním stavem. Mějte na paměti, že seed zajišťuje opakovatelnost, **nikoli nutně plný determinismus** — vyšší úroveň determinismu vynucujte pouze tehdy, je-li skutečně potřeba. Konečný výsledek vykazujte **přes více seedů** a použitý seed i verze prostředí vždy zaznamenejte.
+Na začátku programu se seed nastaví **u všech** použitých generátorů (standardní knihovna, NumPy, framework). Tam, kde je to možné, se upřednostňují **lokální generátory** a výslovné předávání seedu před globálním stavem. Seed zajišťuje opakovatelnost, **nikoli nutně plný determinismus**; vyšší úroveň determinismu se vynucuje pouze tehdy, je-li skutečně zapotřebí. Konečný výsledek se vykazuje **přes více seedů** a použitý seed i verze prostředí se vždy zaznamenávají.

@@ -159,7 +159,7 @@ Nasměrování logů do souboru vyžaduje řád, jinak vznikne jediný nepřehle
 
 **Umístění.** Logy patří do vlastní složky (`logs/`) mimo systém správy verzí — tedy do `.gitignore` (viz [materiál o gitu](../00-git/git-github-pripomenuti.md), kapitola 12), obdobně jako soubor `.env` s citlivými údaji.
 
-**Členění.** Vedle rotace podle velikosti či času (viz kapitola 3) je ve výzkumném kontextu často nejpřehlednější **jeden log na jeden běh**, pojmenovaný časem nebo identifikátorem experimentu a uložený vedle příslušného modelu. Návrat k dřívějšímu experimentu je pak snadný.
+**Členění.** Vedle rotace podle velikosti či času (viz kapitola 3) je ve výzkumném kontextu často nejpřehlednější **jeden log na jeden běh**, pojmenovaný časem nebo identifikátorem experimentu a uložený vedle příslušného modelu. Návrat k dřívějšímu experimentu je pak snadný. Nástroj Hydra ukládá log přímo do adresáře běhu spolu s jeho konfigurací (viz [materiál o správě experimentů](../03-projekt-a-prostredi/sprava-experimentu.md), kapitola 4.4).
 
 ### Co do logu patří a co nikoli
 

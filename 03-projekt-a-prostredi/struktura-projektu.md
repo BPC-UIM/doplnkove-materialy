@@ -300,7 +300,7 @@ projekt/
 
 > **Upozornění (kolize názvů):** Složka `src/projekt/models/` (zdrojový kód modelů) a kořenová složka pro **natrénované** modely by neměly nést týž název. Kořenová složka s uloženými modely se proto obvykle pojmenovává `artifacts/` nebo `checkpoints/`, aby nedošlo k záměně se zdrojovým balíčkem `models`.
 
-> **Zásada oddělení kódu, konfigurace a dat:** Kód patří do `src/`, nastavení do `configs/` (a tajné údaje do `.env`), data a výstupy do vlastních složek mimo verzování (viz [materiál o gitu](../00-git/git-github-pripomenuti.md), kapitola 12). Toto oddělení je společným vláknem několika materiálů této řady ([konfigurace](konfiguracni-soubory.md), [logování](../02-overovani-a-ladeni/logovani.md)) a rozvržení projektu je místem, kde se fyzicky uskutečňuje.
+> **Zásada oddělení kódu, konfigurace a dat:** Kód patří do `src/`, nastavení do `configs/` (a tajné údaje do `.env`), data a výstupy do vlastních složek mimo verzování (viz [materiál o gitu](../00-git/git-github-pripomenuti.md), kapitola 12). Toto oddělení je společným vláknem několika materiálů této řady ([konfigurace](konfiguracni-soubory.md), [logování](../02-overovani-a-ladeni/logovani.md)) a rozvržení projektu je místem, kde se fyzicky uskutečňuje. Členění výstupů jednotlivých běhů ve složce `outputs/` popisuje [materiál o správě experimentů](sprava-experimentu.md), kapitola 3.
 
 ### Obsah souboru README
 

@@ -335,7 +335,7 @@ for epocha in range(pocet_epoch):
 writer.close()
 ```
 
-**Přínos:** Zaznamenané průběhy umožňují porovnávat experimenty a rozpoznat například přeučení podle rozevírající se mezery mezi trénovací a validační ztrátou. Jde o obdobu zásad z [materiálu o logování](../02-overovani-a-ladeni/logovani.md), uzpůsobenou číselným metrikám.
+**Přínos:** Zaznamenané průběhy umožňují porovnávat experimenty a rozpoznat například přeučení podle rozevírající se mezery mezi trénovací a validační ztrátou. Jde o obdobu zásad z [materiálu o logování](../02-overovani-a-ladeni/logovani.md), uzpůsobenou číselným metrikám. Porovnání běhů podle parametrů (`add_hparams`), alternativní nástroj MLflow a propojení se záznamem konfigurace popisuje [materiál o správě experimentů](../03-projekt-a-prostredi/sprava-experimentu.md), kapitoly 7 a 8.
 
 ### 3.8 Reprodukovatelnost tréninku
 

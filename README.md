@@ -41,6 +41,7 @@ Organizace projektu a zajištění opakovatelného běhu kódu v různých prost
 - [Struktura projektu](03-projekt-a-prostredi/struktura-projektu.md) — organizace kódu od notebooku po balíček.
 - [Konfigurační soubory](03-projekt-a-prostredi/konfiguracni-soubory.md) — správa konfigurace aplikací.
 - [Reprodukovatelnost a nastavení seedů](03-projekt-a-prostredi/reprodukovatelnost-seedy.md) — zvládnutí náhodnosti v kódu strojového učení.
+- [Správa experimentů](03-projekt-a-prostredi/sprava-experimentu.md) — parametrizované běhy programu, nástroj Hydra, prohledávání parametrů a sledování metrik.
 - [Kontejnerizace](03-projekt-a-prostredi/kontejnerizace.md) — kontejnery Docker a Apptainer pro přenositelné spouštění kódu.
 
 ### 04-strojove-uceni
